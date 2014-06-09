@@ -4,3 +4,13 @@ th {
 table#logs td {
   text-align: left !important;
 }
+
+div:not(.timeline-event-selected).httpSuccess {
+  background-color: green;
+}
+div:not(.timeline-event-selected).httpRedirect {
+  background-color: blue;
+}
+div:not(.timeline-event-selected).httpError {
+  background-color: red;
+}

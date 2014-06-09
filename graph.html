@@ -2,11 +2,13 @@
 <head>
   <title>Graphs!</title>
   <script src="jquery-2.1.1.js" type="text/javascript"> </script>
-  <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1','packages':['timeline']}]}"></script>
+  <script type="text/javascript" src="https://www.google.com/jsapi?autoload={'modules':[{'name':'visualization','version':'1'}]}"></script>
   <script src="dynatable/jquery.dynatable.js" type="text/javascript"> </script>
+  <script src="timeline/timeline.js"></script>
   <script src="purl.js" type="text/javascript"></script>
   <script src="graph.js" type="text/javascript"></script>
   <link href="dynatable/jquery.dynatable.css" rel="stylesheet" type="text/css">
+  <link href="timeline/timeline.css" rel="stylesheet" type="text/css">
   <link href="request.css" rel="stylesheet" type="text/css">
 </head>
 <body>
@@ -24,7 +26,9 @@
     ElasticSearch took: <span id="duration">0ms</span>, render: <span id="renderduration">0ms</span>,
     requests: <span id="nreqs">0</span>
   </div>
-  <div id="graph" width="100%" height="700px">
+  <div id="graph" width="100%">
+  </div>
+  <div id="selection" width="100%">
   </div>
   <hr />
   <table id="logs">

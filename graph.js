@@ -75,7 +75,15 @@
           } else{
             title = msg.url;
           }
-          chart.push([title, new Date(when), new Date(when + msg.responseTime)]);
+          var cssClass = "httpSuccess";
+          var sc = msg.statusCode
+          if (sc >= 300 && sc < 400) {
+            cssClass = "httpRedirect";
+          }
+          if (sc >= 400) {
+            cssClass = "httpError";
+          }
+          chart.push([title, msg.requestServiceName || "unknown", new Date(when), new Date(when + msg.responseTime), msg, cssClass]);
         } else {
           console.log("Refusing " + JSON.stringify(msg));
         }
@@ -90,17 +98,24 @@
 
     $("#nreqs").text(chart.length);
 
-    var timeline = new google.visualization.Timeline(document.getElementById("graph"));
+    var timeline = new links.Timeline(document.getElementById("graph"));
     var timelineData = new google.visualization.DataTable();
 
-    timelineData.addColumn({ type: "string", id: "URL" });
-    timelineData.addColumn({ type: "date", id: "Start" });
-    timelineData.addColumn({ type: "date", id: "End" });
+    timelineData.addColumn({ type: "string", id: "content" });
+    timelineData.addColumn({ type: "string", id: "group" });
+    timelineData.addColumn({ type: "date", id: "start" });
+    timelineData.addColumn({ type: "date", id: "end" });
+    timelineData.addColumn({ type: "string", id: "msg" });
+    timelineData.addColumn({ type: "string", id: "className" });
 
     timelineData.addRows(chart);
 
-    timeline.draw(timelineData, {
-      height: 700
+    timeline.draw(timelineData);
+
+    google.visualization.events.addListener(timeline, 'select', function() {
+      var sel = timeline.getSelection();
+      var row = sel && sel.length ? chart[sel[0].row] : undefined;
+      timelineSelect(row);
     });
 
     $("#logs").dynatable({
@@ -108,5 +123,18 @@
         records: tdata
       }
     });
+  }
+
+  function timelineSelect(row) {
+    if (row) {
+      var msg = row[4];
+      var text = "";
+      Object.keys(msg).forEach(function(key) {
+        text += key + ": " + msg[key] + "<br/>";
+      });
+      $("#selection").show().html(text);
+    } else {
+      $("#selection").hide();
+    }
   }
 })();
