@@ -7,12 +7,6 @@
     $.ajax({
       url: server + "logstash-2014.06.09/_search",
       contentType: "application/json",
-      // data: JSON.stringify({
-      //   query: { match: {'RequestId': track }},
-      //   filter:
-      //   sort: ["timestamp"],
-      //   size: 10000
-      // }),
       data: {
         q: '+RequestId:"' + requestId + '"',
         sort: "timestamp:asc",
