@@ -3,6 +3,7 @@
 
   function request(requestId, server) {
     startTime = $.now();
+    $("#getlogs").attr('disabled', true);
     $.ajax({
       url: server + "logstash-2014.06.09/_search",
       contentType: "application/json",
@@ -25,7 +26,7 @@
   }
 
   function go(event) {
-    request($("#track").val(), $("#server").val());
+    request($("#requestid").val(), $("#server").val());
   }
 
   google.setOnLoadCallback(function() {
@@ -45,16 +46,18 @@
       });
     }
     if (requestId) {
-      $("#track").val(requestId);
+      $("#requestid").val(requestId);
       $("#getlogs").click();
     }
   });
 
   function onError(jqXHR, textStatus, errorThrown) {
+    $("#getlogs").attr('disabled', false);
     alert("Error: " + textStatus + " " + errorThrown);
   }
 
   function onSuccess(data, textStatus, jqXHR) {
+    $("#getlogs").attr('disabled', false);
     history.replaceState({}, this.requestId, "?server=" + encodeURIComponent(this.server) + "&requestId=" + encodeURIComponent(this.requestId));
 
     $("#duration").text(data.took + " ms");
