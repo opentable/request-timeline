@@ -1,6 +1,6 @@
 (function() {
   var MS_PER_DAY = 24*60*60*1000;
-  var SEARCH_WINDOW = 3 * MS_PER_DAY;
+  var SEARCH_WINDOW = 2 * MS_PER_DAY;
   var startTime = 0;
 
   function request(requestId, server, searchdate) {
