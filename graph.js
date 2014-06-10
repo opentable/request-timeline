@@ -1,11 +1,20 @@
 (function() {
+  var MS_PER_DAY = 24*60*60*1000;
+  var SEARCH_WINDOW = 3 * MS_PER_DAY;
   var startTime = 0;
 
-  function request(requestId, server) {
+  function request(requestId, server, searchdate) {
     startTime = $.now();
     $("#getlogs").attr('disabled', true);
+
+    var around = Date.parse(searchdate);
+    var dates = [];
+    for (var d = around - SEARCH_WINDOW; d <= around + SEARCH_WINDOW && d < new Date().getTime(); d += MS_PER_DAY) {
+      dates.push("logstash-" + new Date(d).toISOString().substring(0, 10).replace("-",".").replace("-","."));
+    }
+
     $.ajax({
-      url: server + "logstash-2014.06.09/_search",
+      url: server + dates.join(',') + "/_search",
       contentType: "application/json",
       data: {
         q: '+RequestId:"' + requestId + '"',
@@ -14,13 +23,14 @@
       },
       server: server,
       requestId: requestId,
+      searchdate: searchdate,
       error: onError,
       success: onSuccess
     });
   }
 
   function go(event) {
-    request($("#requestid").val(), $("#server").val());
+    request($("#requestid").val(), $("#server").val(), $("#searchdate").val());
   }
 
   google.setOnLoadCallback(function() {
@@ -30,6 +40,7 @@
     var url = $.url();
     var server = url.param("server");
     var requestId = url.param("requestId");
+    var searchdate = url.param("searchdate");
 
     if (server) {
       var serverSelect = document.getElementById("server");
@@ -43,6 +54,11 @@
       $("#requestid").val(requestId);
       $("#getlogs").click();
     }
+    if (searchdate) {
+      $("#searchdate").val(searchdate);
+    } else {
+      $("#searchdate").val(new Date().toISOString().substring(0, 10));
+    }
   });
 
   function onError(jqXHR, textStatus, errorThrown) {
@@ -52,7 +68,7 @@
 
   function onSuccess(data, textStatus, jqXHR) {
     $("#getlogs").attr('disabled', false);
-    history.replaceState({}, this.requestId, "?server=" + encodeURIComponent(this.server) + "&requestId=" + encodeURIComponent(this.requestId));
+    history.replaceState({}, this.requestId, "?server=" + encodeURIComponent(this.server) + "&requestId=" + encodeURIComponent(this.requestId) + "&searchdate=" + encodeURIComponent(this.searchdate));
 
     $("#duration").text(data.took + " ms");
     $("#renderduration").text( ($.now() - startTime - data.took) + " ms");
