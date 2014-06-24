@@ -18,7 +18,7 @@
       contentType: "application/json",
       data: {
         q: '+RequestId:"' + requestId + '"',
-        sort: "timestamp:asc",
+        sort: "@timestamp:asc",
         size: 10000
       },
       server: server,
