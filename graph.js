@@ -96,7 +96,7 @@
           if (sc >= 400) {
             cssClass = "httpError";
           }
-          chart.push([title, msg.requestServiceName || "unknown", new Date(when), new Date(when + msg.responseTime), msg, cssClass]);
+          chart.push([title, msg.requestServiceName || "unknown", new Date(when - msg.responseTime), new Date(when), msg, cssClass]);
         } else {
           console.log("Refusing " + JSON.stringify(msg));
         }
