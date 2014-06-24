@@ -80,7 +80,7 @@
       var msg = doc['_source'];
       switch (msg.level) {
       case 'request':
-        var when = Date.parse(msg.timestamp);
+        var when = Date.parse(msg['@timestamp']);
         if (when) {
           var title;
           if (msg.requestServiceName) {
