@@ -78,25 +78,26 @@
 
     data.hits.hits.forEach(function(doc) {
       var msg = doc['_source'];
-      switch (msg.level) {
+      var fields = msg['@fields'];
+      switch (fields.level) {
       case 'request':
         var when = Date.parse(msg['@timestamp']);
         if (when) {
           var title;
-          if (msg.requestServiceName) {
-            title = msg.requestServiceName + ":" + msg.requestEndpointName;
+          if (fields.requestServiceName) {
+            title = fields.requestServiceName + ":" + fields.requestEndpointName;
           } else{
-            title = msg.url;
+            title = fields.url;
           }
           var cssClass = "httpSuccess";
-          var sc = msg.statusCode
+          var sc = fields.statusCode
           if (sc >= 300 && sc < 400) {
             cssClass = "httpRedirect";
           }
           if (sc >= 400) {
             cssClass = "httpError";
           }
-          chart.push([title, msg.requestServiceName || "unknown", new Date(when - msg.responseTime), new Date(when), msg, cssClass]);
+          chart.push([title, fields.requestServiceName || "unknown", new Date(when - fields.responseTime), new Date(when), msg, cssClass]);
         } else {
           console.log("Refusing " + JSON.stringify(msg));
         }
