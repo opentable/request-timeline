@@ -17,7 +17,7 @@
       url: server + dates.join(',') + "/_search",
       contentType: "application/json",
       data: {
-        q: '+RequestId:"' + requestId + '"',
+        q: '+@fields.RequestId:"' + requestId + '"',
         sort: "@timestamp:asc",
         size: 10000
       },
