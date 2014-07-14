@@ -94,7 +94,7 @@
           if (sc >= 300 && sc < 400) {
             cssClass = "httpRedirect";
           }
-          if (sc >= 400) {
+          if (sc >= 400 || typeof sc === 'undefined') {
             cssClass = "httpError";
           }
           chart.push([title, msg.requestServiceName || "unknown", new Date(when - msg.responseTime), new Date(when), msg, cssClass]);
