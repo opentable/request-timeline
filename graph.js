@@ -30,11 +30,12 @@
   }
 
   function go(event) {
+    event.preventDefault();
     request($("#requestid").val(), $("#server").val(), $("#searchdate").val());
   }
 
   google.setOnLoadCallback(function() {
-    $("#getlogs").click(go);
+    $("#getlogs").closest('form').submit(go);
     $("#getlogs").prop("disabled", false);
 
     var url = $.url();
@@ -52,7 +53,7 @@
     }
     if (requestId) {
       $("#requestid").val(requestId);
-      $("#getlogs").click();
+      $("#getlogs").closest('form').submit();
     }
     if (searchdate) {
       $("#searchdate").val(searchdate);
