@@ -17,7 +17,7 @@
       url: server + dates.join(',') + "/_search",
       contentType: "application/json",
       data: {
-        q: '+RequestId:"' + requestId + '"',
+        q: '+ot-requestid:"' + requestId + '"',
         sort: "@timestamp:asc",
         size: 10000
       },
@@ -84,8 +84,9 @@
         var when = Date.parse(msg['@timestamp']);
         if (when) {
           var title;
-          if (msg.requestServiceName) {
-            title = msg.requestServiceName + ":" + msg.requestEndpointName;
+          var referrer = msg.requestServiceName;
+          if (referrer) {
+            title = referrer + ":" + msg.requestEndpointName;
           } else{
             title = msg.url;
           }
@@ -97,7 +98,7 @@
           if (sc >= 400 || typeof sc === 'undefined') {
             cssClass = "httpError";
           }
-          chart.push([title, msg.requestServiceName || "unknown", new Date(when - msg.responseTime), new Date(when), msg, cssClass]);
+          chart.push([title, referrer || "unknown", new Date(when - msg.duration/1000), new Date(when), msg, cssClass]);
         } else {
           console.log("Refusing " + JSON.stringify(msg));
         }
