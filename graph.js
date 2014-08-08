@@ -105,7 +105,8 @@
         }
         break;
       case 'access':
-        break;
+        console.warn("Found access log, this needs to be filled in!");
+        // fallthrough
       default:
         msg.timestamp = msg['@timestamp'];
         tdata.push(msg);
