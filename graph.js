@@ -106,7 +106,7 @@
       case 'access':
         break;
       default:
-        msg.timestamp = Date.parse(msg['@timestamp']);
+        msg.timestamp = msg['@timestamp'];
         tdata.push(msg);
         break;
       }
