@@ -148,7 +148,11 @@
       var msg = row[4];
       var text = "";
       Object.keys(msg).forEach(function(key) {
-        text += key + ": " + msg[key] + "<br/>";
+        var value = msg[key];
+        if (typeof value === "object") {
+          value = JSON.stringify(value);
+        }
+        text += key + ": " + value + "<br/>";
       });
       $("#selection").show().html(text);
     } else {
