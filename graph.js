@@ -79,7 +79,7 @@
 
     data.hits.hits.forEach(function(doc) {
       var msg = doc['_source'];
-      switch (msg.level) {
+      switch (msg.logname) {
       case 'request':
         var when = Date.parse(msg['@timestamp']);
         if (when) {
@@ -91,14 +91,15 @@
             title = msg.url;
           }
           var cssClass = "httpSuccess";
-          var sc = msg.statusCode
+          var sc = msg.status;
           if (sc >= 300 && sc < 400) {
             cssClass = "httpRedirect";
           }
           if (sc >= 400 || typeof sc === 'undefined') {
             cssClass = "httpError";
           }
-          chart.push([title, referrer || "unknown", new Date(when - msg.duration/1000), new Date(when), msg, cssClass]);
+          var duration = msg.duration/1000 || msg.durationms; // hack until we all migrate
+          chart.push([title, referrer || "unknown", new Date(when - duration), new Date(when), msg, cssClass]);
         } else {
           console.log("Refusing " + JSON.stringify(msg));
         }
