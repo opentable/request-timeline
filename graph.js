@@ -80,7 +80,7 @@
     data.hits.hits.forEach(function(doc) {
       var msg = doc['_source'];
       switch (msg.logname) {
-      case 'request':
+      case 'outgoing':
         var when = Date.parse(msg['@timestamp']);
         if (when) {
           var title;
@@ -104,7 +104,7 @@
           console.log("Refusing " + JSON.stringify(msg));
         }
         break;
-      case 'access':
+      case 'request':
         console.warn("Found access log, this needs to be filled in!");
         // fallthrough
       default:
