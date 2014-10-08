@@ -152,11 +152,10 @@
         if (typeof value === "object") {
           value = JSON.stringify(value);
         }
-        text += key + ": " + value + "<br/>";
+        text += "<span class=\"jk\">\"" + key + "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" + value + "\"</span><br/>";
       });
-      $("#selection").show().html(text);
-    } else {
-      $("#selection").hide();
-    }
+      $('#myModal .modal-body').html(text);
+      $('#myModal').modal('show')
+    } 
   }
 })();
