@@ -17,6 +17,10 @@ table#logs td {
 	width: 70%;
 }
 
+#table-severity {
+  width: 10%;
+}
+
 div:not(.timeline-event-selected).httpSuccess {
   background-color: #0BE400;
 }
