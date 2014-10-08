@@ -1,0 +1,67 @@
+#logs th {
+  background-color: #f8f8f8;
+}
+#logs th a{
+	color: #333;
+}
+
+table#logs {
+	table-layout: fixed;
+}
+
+table#logs td {
+	overflow-wrap: break-word;
+}
+
+#table-logmessage {
+	width: 70%;
+}
+
+#table-severity {
+  width: 10%;
+}
+
+div:not(.timeline-event-selected).httpSuccess {
+  background-color: #0BE400;
+}
+div:not(.timeline-event-selected).httpRedirect {
+  background-color: blue;
+}
+div:not(.timeline-event-selected).httpError {
+  background-color: red;
+}
+body {
+  min-height: 2000px;
+  padding-top: 70px;
+}
+
+.logo {
+  height: 30px;
+}
+
+#graph {
+	margin-bottom: 15px;
+}
+span#duration, span#renderduration, span#nreqs {
+  font-weight: bold;
+}
+
+#metadata{
+	float: right;
+}
+
+span.jk {
+  color: #000080;
+}
+
+span.jc {
+  color: #000000;
+}
+
+span.jv {
+  color: #df5000;
+}
+
+#myModal .modal-body {
+	overflow-wrap: break-word;
+}
