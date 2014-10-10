@@ -32,7 +32,7 @@ div:not(.timeline-event-selected).httpError {
 }
 body {
   min-height: 2000px;
-  padding-top: 70px;
+  padding-top: 100px;
 }
 
 .logo {
