@@ -3,6 +3,20 @@
   var SEARCH_WINDOW = 2 * MS_PER_DAY;
   var startTime = 0;
 
+  var $table = $('#logs').dataTable({
+    columns: [
+      {
+        data: 'timestamp'
+      },
+      {
+        data: 'severity'
+      },
+      {
+        data: 'logmessage'
+      }
+    ]
+  });
+
   function request(requestId, server, searchdate) {
     startTime = $.now();
     $("#getlogs").attr('disabled', true);
@@ -136,11 +150,10 @@
       timelineSelect(row);
     });
 
-    $("#logs").dynatable({
-      dataset: {
-        records: tdata
-      }
-    });
+    var api = $table.dataTable().api();
+    api.clear();
+    api.rows.add(tdata);
+    api.draw();
   }
 
   function timelineSelect(row) {
