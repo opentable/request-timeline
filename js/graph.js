@@ -173,7 +173,7 @@
         text += "<span class=\"jk\">\"" + key + "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" + value + "\"</span><br/>";
       });
       $('#myModal .modal-body').html(text);
-      $('#myModal').modal('show')
-    } 
+      $('#myModal').modal('show');
+    }
   }
 })();
