@@ -17,6 +17,12 @@
     ]
   });
 
+  $table.on( 'click', 'tr', function () {
+    var api = $table.dataTable().api();
+    var rowData = api.row(this).data();
+    showMessage(rowData);
+  });
+
   function request(requestId, server, searchdate) {
     startTime = $.now();
     $("#getlogs").attr('disabled', true);
@@ -147,7 +153,7 @@
     google.visualization.events.addListener(timeline, 'select', function() {
       var sel = timeline.getSelection();
       var row = sel && sel.length ? chart[sel[0].row] : undefined;
-      timelineSelect(row);
+      showMessage(row && row[4]);
     });
 
     var api = $table.dataTable().api();
@@ -156,9 +162,8 @@
     api.draw();
   }
 
-  function timelineSelect(row) {
-    if (row) {
-      var msg = row[4];
+  function showMessage(msg) {
+    if (msg) {
       var text = "";
       Object.keys(msg).forEach(function(key) {
         var value = msg[key];
