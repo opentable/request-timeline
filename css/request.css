@@ -13,6 +13,10 @@ table#logs td {
 	overflow-wrap: break-word;
 }
 
+table#logs tr {
+  cursor: pointer;
+}
+
 #table-logmessage {
 	width: 70%;
 }
@@ -64,4 +68,6 @@ span.jv {
 
 #myModal .modal-body {
 	overflow-wrap: break-word;
+  max-height: 800px;
+  overflow-y: scroll;
 }
