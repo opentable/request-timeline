@@ -9,10 +9,12 @@
         data: 'timestamp'
       },
       {
-        data: 'severity'
+        data: 'severity',
+        defaultContent: 'NONE'
       },
       {
-        data: 'logmessage'
+        data: 'logmessage',
+        defaultContent: ''
       }
     ]
   });
