@@ -2,6 +2,9 @@
   var MS_PER_DAY = 24*60*60*1000;
   var SEARCH_WINDOW = 2 * MS_PER_DAY;
   var startTime = 0;
+  var tdata = [];
+  var outgoingData = [];
+  var requestData = [];
 
   var $table = $('#logs').dataTable({
     columns: [
@@ -23,6 +26,20 @@
     var api = $table.dataTable().api();
     var rowData = api.row(this).data();
     showMessage(rowData);
+  });
+
+  $('#toggleLogType #outgoing').on('click', function () {
+    var outgoingState = !$('#toggleLogType #outgoing').hasClass('active');
+    var requestState = $('#toggleLogType #request').hasClass('active');
+
+    bindDataToTimeline(outgoingState, requestState);
+  });
+
+  $('#toggleLogType #request').on('click', function () {
+    var outgoingState = $('#toggleLogType #outgoing').hasClass('active');
+    var requestState = !$('#toggleLogType #request').hasClass('active');
+
+    bindDataToTimeline(outgoingState, requestState);
   });
 
   function request(requestId, server, searchdate) {
@@ -96,39 +113,18 @@
     $("#duration").text(data.took + " ms");
     $("#renderduration").text( ($.now() - startTime - data.took) + " ms");
 
-    var chart = [];
-    var tdata = [];
+    tdata = [];
+    outgoingData = [];
+    requestData = [];
 
     data.hits.hits.forEach(function(doc) {
       var msg = doc['_source'];
       switch (msg.logname) {
       case 'outgoing':
-        var when = Date.parse(msg['@timestamp']);
-        if (when) {
-          var title;
-          var referrer = msg.requestServiceName;
-          if (referrer) {
-            title = referrer + ":" + msg.requestEndpointName;
-          } else{
-            title = msg.url;
-          }
-          var cssClass = "httpSuccess";
-          var sc = msg.status;
-          if (sc >= 300 && sc < 400) {
-            cssClass = "httpRedirect";
-          }
-          if (sc >= 400 || typeof sc === 'undefined') {
-            cssClass = "httpError";
-          }
-          var duration = msg.duration/1000 || msg.durationms; // hack until we all migrate
-          chart.push([title, referrer || "unknown", new Date(when - duration), new Date(when), msg, cssClass]);
-        } else {
-          console.log("Refusing " + JSON.stringify(msg));
-        }
+        outgoingData.push(populateTimelineRequest(msg));
         break;
       case 'request':
-        console.warn("Found access log, this needs to be filled in!");
-        // fallthrough
+        requestData.push(populateTimelineRequest(msg));
       default:
         msg.timestamp = msg['@timestamp'];
         tdata.push(msg);
@@ -136,8 +132,10 @@
       }
     });
 
-    $("#nreqs").text(chart.length);
+    bindDataToTimeline(true, false);
+  }
 
+  function bindDataToTimeline(bindOutgoing, bindRequest) {
     var timeline = new links.Timeline(document.getElementById("graph"));
     var timelineData = new google.visualization.DataTable();
 
@@ -148,13 +146,39 @@
     timelineData.addColumn({ type: "string", id: "msg" });
     timelineData.addColumn({ type: "string", id: "className" });
 
-    timelineData.addRows(chart);
+    var numberOfRequests;
+    if (bindOutgoing && !bindRequest) {
+      numberOfRequests = outgoingData.length;
+      timelineData.addRows(outgoingData);
+    } 
+    else if (!bindOutgoing && bindRequest) {
+      numberOfRequests = requestData.length;
+      timelineData.addRows(requestData);
+    }
+    else if (bindOutgoing && bindRequest) {
+      numberOfRequests = requestData.length + outgoingData.length;
+      timelineData.addRows(outgoingData);
+      timelineData.addRows(requestData);
+    }
+
+    $("#nreqs").text(numberOfRequests);
 
     timeline.draw(timelineData);
 
     google.visualization.events.addListener(timeline, 'select', function() {
       var sel = timeline.getSelection();
-      var row = sel && sel.length ? chart[sel[0].row] : undefined;
+      var row;
+
+      if (bindOutgoing && !bindRequest) {
+        row = sel && sel.length ? outgoingData[sel[0].row] : undefined;
+      }
+      else if (!bindOutgoing && bindRequest) {
+        row = sel && sel.length ? requestData[sel[0].row] : undefined;
+      }
+      else if (bindOutgoing && bindRequest) {
+        var allData = outgoingData.concat(requestData);
+        row = sel && sel.length ? allData[sel[0].row] : undefined; 
+      }
       showMessage(row && row[4]);
     });
 
@@ -162,6 +186,34 @@
     api.clear();
     api.rows.add(tdata);
     api.draw();
+  }
+
+  function populateTimelineRequest(msg) {
+    var timelineRequestItem;
+    var when = Date.parse(msg['@timestamp']);
+    if (when) {
+      var title;
+      var referrer = msg.servicetype;
+      if (referrer) {
+        title = referrer + ":" + msg.url;
+      } else{
+        title = msg.url;
+      }
+      var cssClass = "httpSuccess" + " " + msg.logname;
+      var sc = msg.status;
+      if (sc >= 300 && sc < 400) {
+        cssClass = "httpRedirect";
+      }
+      if (sc >= 400 || typeof sc === 'undefined') {
+        cssClass = "httpError";
+      }
+      var duration = msg.duration/1000 || msg.durationms; // hack until we all migrate
+      timelineRequestItem = [title, referrer || "unknown", new Date(when - duration), new Date(when), msg, cssClass];
+    } 
+    else {
+      console.log("Refusing " + JSON.stringify(msg));
+    }
+    return timelineRequestItem;
   }
 
   function showMessage(msg) {
