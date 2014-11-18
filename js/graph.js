@@ -28,6 +28,19 @@
     showMessage(rowData);
   });
 
+  var timelineData = new vis.DataSet();
+  var timelineDataGroups = new vis.DataSet();
+  var timeline = new vis.Timeline(document.getElementById("graph"));
+
+  timeline.on('select', function() {
+    var sel = timeline.getSelection();
+    var element;
+    if (sel && sel.length) {
+      element = timelineData.get(sel[0]);
+    }
+    showMessage(element && element.msg);
+  });
+
   $('#toggleLogType #outgoing').on('click', function () {
     var outgoingState = !$('#toggleLogType #outgoing').hasClass('active');
     var requestState = $('#toggleLogType #request').hasClass('active');
@@ -73,7 +86,7 @@
     request($("#requestid").val(), $("#server").val(), $("#searchdate").val());
   }
 
-  google.setOnLoadCallback(function() {
+  $(document).ready(function() {
     $("#getlogs").closest('form').submit(go);
     $("#getlogs").prop("disabled", false);
 
@@ -136,51 +149,38 @@
   }
 
   function bindDataToTimeline(bindOutgoing, bindRequest) {
-    var timeline = new links.Timeline(document.getElementById("graph"));
-    var timelineData = new google.visualization.DataTable();
-
-    timelineData.addColumn({ type: "string", id: "content" });
-    timelineData.addColumn({ type: "string", id: "group" });
-    timelineData.addColumn({ type: "date", id: "start" });
-    timelineData.addColumn({ type: "date", id: "end" });
-    timelineData.addColumn({ type: "string", id: "msg" });
-    timelineData.addColumn({ type: "string", id: "className" });
+    timelineData.clear();
+    timelineDataGroups.clear();
 
     var numberOfRequests;
     if (bindOutgoing && !bindRequest) {
       numberOfRequests = outgoingData.length;
-      timelineData.addRows(outgoingData);
+      timelineData.add(outgoingData);
     } 
     else if (!bindOutgoing && bindRequest) {
       numberOfRequests = requestData.length;
-      timelineData.addRows(requestData);
+      timelineData.add(requestData);
     }
     else if (bindOutgoing && bindRequest) {
       numberOfRequests = requestData.length + outgoingData.length;
-      timelineData.addRows(outgoingData);
-      timelineData.addRows(requestData);
+      timelineData.add(outgoingData);
+      timelineData.add(requestData);
     }
 
     $("#nreqs").text(numberOfRequests);
 
-    timeline.draw(timelineData);
-
-    google.visualization.events.addListener(timeline, 'select', function() {
-      var sel = timeline.getSelection();
-      var row;
-
-      if (bindOutgoing && !bindRequest) {
-        row = sel && sel.length ? outgoingData[sel[0].row] : undefined;
+    timelineData.forEach(function(item) {
+      if (!timelineDataGroups.get(item.group)) {
+        timelineDataGroups.add([{
+          id: item.group,
+          content: item.group
+        }]);
       }
-      else if (!bindOutgoing && bindRequest) {
-        row = sel && sel.length ? requestData[sel[0].row] : undefined;
-      }
-      else if (bindOutgoing && bindRequest) {
-        var allData = outgoingData.concat(requestData);
-        row = sel && sel.length ? allData[sel[0].row] : undefined; 
-      }
-      showMessage(row && row[4]);
     });
+    timeline.setItems(timelineData);
+    timeline.setGroups(timelineDataGroups);
+    // timeline.fit() animates to fit new data set.
+    timeline.fit();
 
     var api = $table.dataTable().api();
     api.clear();
@@ -208,7 +208,14 @@
         cssClass = "httpError";
       }
       var duration = msg.duration/1000 || msg.durationms; // hack until we all migrate
-      timelineRequestItem = [title, referrer || "unknown", new Date(when - duration), new Date(when), msg, cssClass];
+      timelineRequestItem = {
+        "content": title,
+        "group": referrer || "unknown",
+        "start": new Date(when - duration),
+        "end": new Date(when),
+        "msg": msg,
+        "className": cssClass
+      };
     } 
     else {
       console.log("Refusing " + JSON.stringify(msg));
