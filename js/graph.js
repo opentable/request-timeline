@@ -179,6 +179,8 @@
     });
     timeline.setItems(timelineData);
     timeline.setGroups(timelineDataGroups);
+    // timeline.fit() animates to fit new data set.
+    timeline.fit();
 
     var api = $table.dataTable().api();
     api.clear();
