@@ -29,6 +29,7 @@
   });
 
   var timelineData = new vis.DataSet();
+  var timelineDataGroups = new vis.DataSet();
   var timeline = new vis.Timeline(document.getElementById("graph"));
 
   timeline.on('select', function() {
@@ -149,6 +150,7 @@
 
   function bindDataToTimeline(bindOutgoing, bindRequest) {
     timelineData.clear();
+    timelineDataGroups.clear();
 
     var numberOfRequests;
     if (bindOutgoing && !bindRequest) {
@@ -167,7 +169,16 @@
 
     $("#nreqs").text(numberOfRequests);
 
+    timelineData.forEach(function(item) {
+      if (!timelineDataGroups.get(item.group)) {
+        timelineDataGroups.add([{
+          id: item.group,
+          content: item.group
+        }]);
+      }
+    });
     timeline.setItems(timelineData);
+    timeline.setGroups(timelineDataGroups);
 
     var api = $table.dataTable().api();
     api.clear();
