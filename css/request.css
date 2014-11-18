@@ -21,17 +21,17 @@ table#logs tr {
   width: 10%;
 }
 
-div:not(.timeline-event-selected).httpSuccess {
+.vis.timeline .item:not(.timeline-event-selected).httpSuccess {
   background-color: #0BE400;
 }
-div:not(.timeline-event-selected).httpRedirect {
+.vis.timeline .item:not(.timeline-event-selected).httpRedirect {
   background-color: blue;
 }
-div:not(.timeline-event-selected).httpError {
+.vis.timeline .item:not(.timeline-event-selected).httpError {
   background-color: red;
 }
 
-div:not(.timeline-event-selected).request {
+.vis.timeline .item:not(.timeline-event-selected).request {
   background-color: #B562CF !important;
 }
 body {
