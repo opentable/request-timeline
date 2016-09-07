@@ -81,3 +81,8 @@ span.jv {
   max-height: 800px;
   overflow-y: scroll;
 }
+
+#progress-bar {
+  display: none;
+  align: center;
+}

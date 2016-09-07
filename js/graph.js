@@ -65,6 +65,9 @@
       dates.push("logstash-" + new Date(d).toISOString().substring(0, 10).replace("-",".").replace("-","."));
     }
 
+    $("#progress-bar").show();
+    $("#timeline-content").hide();
+
     $.ajax({
       url: server + dates.join(',') + "/_search",
       contentType: "application/json",
@@ -114,12 +117,19 @@
     }
   });
 
+  function onFinished() {
+    $("#progress-bar").hide();
+    $("#timeline-content").show();
+  }
+
   function onError(jqXHR, textStatus, errorThrown) {
+    onFinished();
     $("#getlogs").attr('disabled', false);
     alert("Error: " + textStatus + " " + errorThrown);
   }
 
   function onSuccess(data, textStatus, jqXHR) {
+    onFinished();
     $("#getlogs").attr('disabled', false);
     history.replaceState({}, this.requestId, "?server=" + encodeURIComponent(this.server) + "&requestId=" + encodeURIComponent(this.requestId) + "&searchdate=" + encodeURIComponent(this.searchdate));
 
