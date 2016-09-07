@@ -1,12 +1,13 @@
 #logs th {
   background-color: #f8f8f8;
 }
-#logs th a{
-	color: #333;
+
+#logs th a {
+  color: #333;
 }
 
 table#logs td {
-	overflow-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 table#logs tr {
@@ -14,7 +15,7 @@ table#logs tr {
 }
 
 #table-logmessage {
-	width: 70%;
+  width: 70%;
 }
 
 #table-severity {
@@ -34,6 +35,7 @@ table#logs tr {
 .vis-timeline .vis-item:not(.vis-selected).request {
   background-color: #B562CF !important;
 }
+
 body {
   min-height: 2000px;
   padding-top: 70px;
@@ -44,15 +46,16 @@ body {
 }
 
 #graph {
-	margin-bottom: 15px;
+  margin-bottom: 15px;
   margin-top: 15px;
 }
+
 span#duration, span#renderduration, span#nreqs {
   font-weight: bold;
 }
 
-#metadata{
-	float: right;
+#metadata {
+  float: right;
   line-height: 40px;
 }
 
@@ -69,7 +72,7 @@ span.jv {
 }
 
 #myModal .modal-body {
-	overflow-wrap: break-word;
+  overflow-wrap: break-word;
   max-height: 800px;
   overflow-y: scroll;
 }
