@@ -22,6 +22,11 @@ table#logs tr {
   width: 10%;
 }
 
+.ot-brand {
+    line-height: 50px;
+    font-size: 18px;
+}
+
 .vis-timeline .vis-item:not(.vis-selected).httpSuccess {
   background-color: #0BE400;
 }
