@@ -90,6 +90,7 @@
   }
 
   $(document).ready(function() {
+    $('#searchdate').datepicker({});
     $("#getlogs").closest('form').submit(go);
     $("#getlogs").prop("disabled", false);
 
