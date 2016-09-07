@@ -1,3 +1,5 @@
+@import '../node_modules/spinners/stylesheets/spinners';
+
 #logs th {
   background-color: #f8f8f8;
 }
@@ -23,8 +25,8 @@ table#logs tr {
 }
 
 .ot-brand {
-    line-height: 50px;
-    font-size: 18px;
+  line-height: 50px;
+  font-size: 18px;
 }
 
 .vis-timeline .vis-item:not(.vis-selected).httpSuccess {
@@ -42,8 +44,12 @@ table#logs tr {
 }
 
 body {
-  min-height: 2000px;
+  height: 100%;
   padding-top: 70px;
+}
+
+html {
+  height: 100%;
 }
 
 .logo {
@@ -83,6 +89,12 @@ span.jv {
 }
 
 #progress-bar {
-  display: none;
-  align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+
+  .spinner {
+    @include spinner(border-width 15px, 300px, border-color rgb(218, 55, 67));
+  }
 }

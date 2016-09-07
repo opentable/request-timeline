@@ -65,8 +65,8 @@
       dates.push("logstash-" + new Date(d).toISOString().substring(0, 10).replace("-",".").replace("-","."));
     }
 
-    $("#progress-bar").show();
-    $("#timeline-content").hide();
+    $("#progress-bar").removeClass('hide');
+    $("#timeline-content").addClass('hide');
 
     $.ajax({
       url: server + dates.join(',') + "/_search",
@@ -118,8 +118,8 @@
   });
 
   function onFinished() {
-    $("#progress-bar").hide();
-    $("#timeline-content").show();
+    $("#progress-bar").addClass('hide');
+    $("#timeline-content").removeClass('hide');
   }
 
   function onError(jqXHR, textStatus, errorThrown) {
