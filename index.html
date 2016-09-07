@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <meta charset="utf-8">
   <title>OpenTable Request Timeline</title>
   <link href="bower_components/vis/dist/vis.min.css" rel="stylesheet" type="text/css">
   <link href="css/style.css" rel="stylesheet" type="text/css">
@@ -36,7 +37,6 @@
               <option value="http://es-logging-qa.otenv.com:9200/">QA Logstash</option>
             </select>
           </div>
-          <input type="submit" id="getlogs" value="Go!" disabled="true" class="btn btn-success" />
         </form>
       </div><!--/.navbar-collapse -->
     </div>
@@ -50,8 +50,8 @@
         <label class="btn btn-primary active" id="outgoing">
           <input type="checkbox"  autocomplete="off" checked> Outgoing
         </label>
-        <label class="btn btn-primary" id="request">
-          <input type="checkbox" autocomplete="off"> Request
+        <label class="btn btn-primary active" id="request">
+          <input type="checkbox" autocomplete="off" checked> Request
         </label>
       </div>
 

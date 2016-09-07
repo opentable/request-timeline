@@ -57,7 +57,6 @@
 
   function request(requestId, server, searchdate) {
     startTime = $.now();
-    $("#getlogs").attr('disabled', true);
 
     var around = Date.parse(searchdate);
     var dates = [];
@@ -85,14 +84,19 @@
   }
 
   function go(event) {
-    event.preventDefault();
+    if (event) {
+      event.preventDefault();
+    }
     request($("#requestid").val(), $("#server").val(), $("#searchdate").val());
   }
 
   $(document).ready(function() {
-    $('#searchdate').datepicker({});
-    $("#getlogs").closest('form').submit(go);
-    $("#getlogs").prop("disabled", false);
+    $('#searchdate').datepicker({
+      format: 'yyyy-mm-dd',
+    });
+    $("#requestid").change(go);
+    $("#searchdate").change(go);
+    $("#server").change(go);
 
     var url = $.url();
     var server = url.param("server");
@@ -107,14 +111,14 @@
         }
       });
     }
-    if (requestId) {
-      $("#requestid").val(requestId);
-      $("#getlogs").closest('form').submit();
-    }
     if (searchdate) {
       $("#searchdate").val(searchdate);
     } else {
       $("#searchdate").val(new Date().toISOString().substring(0, 10));
+    }
+    if (requestId) {
+      $("#requestid").val(requestId);
+      go();
     }
   });
 
@@ -125,13 +129,11 @@
 
   function onError(jqXHR, textStatus, errorThrown) {
     onFinished();
-    $("#getlogs").attr('disabled', false);
     alert("Error: " + textStatus + " " + errorThrown);
   }
 
   function onSuccess(data, textStatus, jqXHR) {
     onFinished();
-    $("#getlogs").attr('disabled', false);
     history.replaceState({}, this.requestId, "?server=" + encodeURIComponent(this.server) + "&requestId=" + encodeURIComponent(this.requestId) + "&searchdate=" + encodeURIComponent(this.searchdate));
 
     $("#duration").text(data.took + " ms");
@@ -156,7 +158,7 @@
       }
     });
 
-    bindDataToTimeline(true, false);
+    bindDataToTimeline(true, true);
   }
 
   function bindDataToTimeline(bindOutgoing, bindRequest) {
