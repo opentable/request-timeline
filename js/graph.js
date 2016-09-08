@@ -1,7 +1,7 @@
 (function() {
+  var SERVERS = ["http://es-logging.otenv.com:9200/", "http://es-logging-qa.otenv.com:9200/"];
   var MS_PER_DAY = 24*60*60*1000;
   var SEARCH_WINDOW = 2 * MS_PER_DAY;
-  var startTime = 0;
   var tdata = [];
   var outgoingData = [];
   var requestData = [];
@@ -55,9 +55,7 @@
     bindDataToTimeline(outgoingState, requestState);
   });
 
-  function request(requestId, server, searchdate) {
-    startTime = $.now();
-
+  function request(requestId, searchdate) {
     var around = Date.parse(searchdate);
     var dates = [];
     for (var d = around - SEARCH_WINDOW; d <= around + SEARCH_WINDOW && d < new Date().getTime(); d += MS_PER_DAY) {
@@ -67,27 +65,28 @@
     $("#progress-bar").removeClass('hide');
     $("#timeline-content").addClass('hide');
 
-    $.ajax({
-      url: server + dates.join(',') + "/_search",
-      contentType: "application/json",
-      data: {
-        q: '+ot-requestid:"' + requestId + '"',
-        sort: "@timestamp:asc",
-        size: 10000
-      },
-      server: server,
-      requestId: requestId,
-      searchdate: searchdate,
-      error: onError,
-      success: onSuccess
-    });
+    var start = new Date();
+
+    $.when.apply($, $.map(SERVERS, function(server) {
+      return $.ajax({
+        url: server + dates.join(',') + "/_search",
+        contentType: "application/json",
+        data: {
+          q: '+ot-requestid:"' + requestId + '"',
+          sort: "@timestamp:asc",
+          size: 10000
+        },
+      });
+    })).then(function() {
+      return _.reduce(arguments, function(result, item) { return result.concat(item[0].hits.hits); }, []);
+    }).then(function (hits) { onSuccess(hits, requestId, searchdate, start); });
   }
 
   function go(event) {
     if (event) {
       event.preventDefault();
     }
-    request($("#requestid").val(), $("#server").val(), $("#searchdate").val());
+    request($("#requestid").val(), $("#searchdate").val());
   }
 
   $(document).ready(function() {
@@ -96,21 +95,11 @@
     });
     $("#requestid").change(go);
     $("#searchdate").change(go);
-    $("#server").change(go);
 
     var url = $.url();
-    var server = url.param("server");
     var requestId = url.param("requestId");
     var searchdate = url.param("searchdate");
 
-    if (server) {
-      var serverSelect = document.getElementById("server");
-      $.each(serverSelect.options, function (idx, option) {
-        if (option.value == server) {
-          serverSelect.selectedIndex = idx;
-        }
-      });
-    }
     if (searchdate) {
       $("#searchdate").val(searchdate);
     } else {
@@ -132,18 +121,18 @@
     alert("Error: " + textStatus + " " + errorThrown);
   }
 
-  function onSuccess(data, textStatus, jqXHR) {
+  function onSuccess(hits, requestId, searchDate, startTime) {
     onFinished();
-    history.replaceState({}, this.requestId, "?server=" + encodeURIComponent(this.server) + "&requestId=" + encodeURIComponent(this.requestId) + "&searchdate=" + encodeURIComponent(this.searchdate));
+    history.replaceState({}, requestId, "?requestId=" + encodeURIComponent(requestId) + "&searchdate=" + encodeURIComponent(searchDate));
 
-    $("#duration").text(data.took + " ms");
-    $("#renderduration").text( ($.now() - startTime - data.took) + " ms");
+    var timeSpent = new Date() - startTime;
+    $("#duration").text(timeSpent + " ms");
 
     tdata = [];
     outgoingData = [];
     requestData = [];
 
-    data.hits.hits.forEach(function(doc) {
+    hits.forEach(function(doc) {
       var msg = doc['_source'];
       switch (msg.logname) {
       case 'outgoing':
