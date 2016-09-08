@@ -77,9 +77,17 @@
           size: 10000
         },
       });
-    })).then(function() {
+    }))
+    .always(onFinished)
+    .fail(function(jqXHR, textStatus, errorThrown) {
+      alert("Error: " + textStatus + " " + errorThrown);
+    })
+    .then(function() {
       return _.reduce(arguments, function(result, item) { return result.concat(item[0].hits.hits); }, []);
-    }).then(function (hits) { onSuccess(hits, requestId, searchdate, start); });
+    })
+    .then(function (hits) {
+      onSuccess(hits, requestId, searchdate, start);
+    });
   }
 
   function go(event) {
@@ -116,13 +124,7 @@
     $("#timeline-content").removeClass('hide');
   }
 
-  function onError(jqXHR, textStatus, errorThrown) {
-    onFinished();
-    alert("Error: " + textStatus + " " + errorThrown);
-  }
-
   function onSuccess(hits, requestId, searchDate, startTime) {
-    onFinished();
     history.replaceState({}, requestId, "?requestId=" + encodeURIComponent(requestId) + "&searchdate=" + encodeURIComponent(searchDate));
 
     var timeSpent = new Date() - startTime;
