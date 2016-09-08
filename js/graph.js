@@ -203,7 +203,7 @@
       } else{
         title = msg.url;
       }
-      var cssClass = "httpSuccess" + " " + msg.logname;
+      var cssClass = "httpSuccess " + msg.logname;
       var sc = msg.status;
       if (sc >= 300 && sc < 400) {
         cssClass = "httpRedirect";
@@ -227,6 +227,12 @@
     return timelineRequestItem;
   }
 
+  var escape = document.createElement('textarea');
+  function escapeHTML(html) {
+      escape.textContent = html;
+      return escape.innerHTML;
+  }
+
   function showMessage(msg) {
     if (msg) {
       var text = "";
@@ -235,7 +241,7 @@
         if (typeof value === "object") {
           value = JSON.stringify(value);
         }
-        text += "<span class=\"jk\">\"" + key + "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" + value + "\"</span><br/>";
+        text += "<span class=\"jk\">\"" + key + "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" + escapeHTML(value) + "\"</span><br/>";
       });
       $('#myModal .modal-body').html(text);
       $('#myModal').modal('show');
