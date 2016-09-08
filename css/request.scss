@@ -46,6 +46,7 @@ table#logs tr {
 body {
   height: 100%;
   padding-top: 70px;
+  font-family: sans-serif !important; // chrome sux
 }
 
 html {
@@ -67,7 +68,7 @@ span#duration, span#renderduration, span#nreqs {
 
 #metadata {
   float: right;
-  line-height: 40px;
+  line-height: 34px;
 }
 
 span.jk {
