@@ -142,11 +142,11 @@
         break;
       case 'request':
         requestData.push(populateTimelineRequest(msg));
-      default:
-        msg.timestamp = msg['@timestamp'];
-        tdata.push(msg);
         break;
       }
+      msg.timestamp = msg['@timestamp'];
+      msg.logmessage = _.escape(msg.logmessage);
+      tdata.push(msg);
     });
 
     bindDataToTimeline(true, true);
@@ -225,7 +225,7 @@
       }
       var duration = Math.max(msg.duration/1000 || msg.durationms, 1); // hack until we all migrate
       timelineRequestItem = {
-        "content": title,
+        "content": _.escape(title),
         "group": referrer || "unknown",
         "start": new Date(when - duration),
         "end": new Date(when),
@@ -239,12 +239,6 @@
     return timelineRequestItem;
   }
 
-  var escape = document.createElement('textarea');
-  function escapeHTML(html) {
-      escape.textContent = html;
-      return escape.innerHTML;
-  }
-
   function showMessage(msg) {
     if (msg) {
       var text = "";
@@ -253,7 +247,7 @@
         if (typeof value === "object") {
           value = JSON.stringify(value);
         }
-        text += "<span class=\"jk\">\"" + key + "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" + escapeHTML(value) + "\"</span><br/>";
+        text += "<span class=\"jk\">\"" + key + "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" + _.escape(value) + "\"</span><br/>";
       });
       $('#myModal .modal-body').html(text);
       $('#myModal').modal('show');
