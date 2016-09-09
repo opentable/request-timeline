@@ -16,6 +16,10 @@
         defaultContent: 'NONE'
       },
       {
+        data: 'servicetype',
+        defaultContent: 'NONE',
+      },
+      {
         data: 'logmessage',
         defaultContent: ''
       }
@@ -144,9 +148,12 @@
         requestData.push(populateTimelineRequest(msg));
         break;
       }
-      msg.timestamp = msg['@timestamp'];
-      msg.logmessage = _.escape(msg.logmessage);
-      tdata.push(msg);
+      tdata.push({
+        logmessage: _.escape(msg.logmessage),
+        timestamp: msg['@timestamp'],
+        severity: msg.severity,
+        servicetype: msg.servicetype
+      });
     });
 
     bindDataToTimeline(true, true);
