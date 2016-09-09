@@ -99,3 +99,12 @@ span.jv {
     @include spinner(border-width 15px, 300px, border-color rgb(218, 55, 67));
   }
 }
+
+.qtip-content {
+  font-size: 1.5em;
+  line-height: 1.5em;
+}
+
+.qtip {
+  max-width: 500px !important;
+}

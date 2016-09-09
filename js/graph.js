@@ -190,6 +190,18 @@
     api.clear();
     api.rows.add(tdata);
     api.draw();
+
+    $(".vis-item").qtip({
+      position: {
+        my: 'top left',
+        at: 'bottom left',
+      },
+      content: {
+        text: function() {
+          return _.escape($(this).text());
+        }
+      }
+    });
   }
 
   function populateTimelineRequest(msg) {
