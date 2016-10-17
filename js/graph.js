@@ -1,5 +1,5 @@
 (function() {
-  var SERVERS = ["http://es-logging.otenv.com:9200/", "http://es-logging-qa.otenv.com:9200/"];
+  var SERVERS = ["http://es-logging.otenv.com:9200/", "http://es-logging-qa.otenv.com:9200/", "http://loglov3-logging-qa.otenv.com:9200/", "http://loglov3-logging-prod.otenv.com:9200/"];
   var MS_PER_DAY = 24*60*60*1000;
   var SEARCH_WINDOW = 2 * MS_PER_DAY;
   var tdata = [];
