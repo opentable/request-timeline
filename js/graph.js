@@ -76,7 +76,9 @@
         url: server + dates.join(',') + "/_search",
         contentType: "application/json",
         data: {
-          q: '+ot-requestid:"' + requestId + '"',
+          // We search for both the old-style ot-requestid and the
+          // loglov3-style request-id.
+          q: 'ot-requestid:"' + requestId + '" request-id:"' + requestId + '"',
           sort: "@timestamp:asc",
           size: 10000
         },
