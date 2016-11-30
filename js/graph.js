@@ -13,15 +13,15 @@
       },
       {
         data: 'severity',
-        defaultContent: 'NONE'
+        defaultContent: '__missing__'
       },
       {
         data: 'servicetype',
-        defaultContent: 'NONE'
+        defaultContent: '__missing__'
       },
       {
         data: 'logmessage',
-        defaultContent: ''
+        defaultContent: '__missing__'
       }
     ]
   });
