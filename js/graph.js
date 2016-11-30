@@ -17,7 +17,7 @@
       },
       {
         data: 'servicetype',
-        defaultContent: 'NONE',
+        defaultContent: 'NONE'
       },
       {
         data: 'logmessage',
