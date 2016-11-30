@@ -9,18 +9,18 @@
   var $table = $('#logs').dataTable({
     columns: [
       {
-        data: 'timestamp'
+        data: '@timestamp'
       },
       {
         data: 'severity',
         defaultContent: '__missing__'
       },
       {
-        data: 'servicetype',
+        data: 'component-id',
         defaultContent: '__missing__'
       },
       {
-        data: 'logmessage',
+        data: 'message',
         defaultContent: '__missing__'
       }
     ]
@@ -150,12 +150,41 @@
         requestData.push(populateTimelineRequest(msg));
         break;
       }
-      tdata.push({
-        logmessage: _.escape(msg.logmessage),
-        timestamp: msg['@timestamp'],
-        severity: msg.severity,
-        servicetype: msg.servicetype
-      });
+
+      // Run through all message fields, stringify those that need it,
+      // conditionally truncate, put results in out.
+      var out = {};
+      for (var key in msg) if (msg.hasOwnProperty(key)) {
+        var value = msg[key];
+        switch (typeof value) {
+        case 'object':
+          value = JSON.stringify(value);
+          break;
+        case 'function':
+        case 'symbol':
+          value = value.toString();
+          break;
+        }
+        if (typeof value == 'string') {
+          if (value.length > 512) {
+            value = value.substring(0, 512) + '...';
+          }
+          value = _.escape(value);
+        }
+        out[key] = value;
+      }
+
+      // Normalize table-needed data in V2 "schema" to match V3 (ot-v1) schema.
+      if (out.logmessage) {
+        out.message = out.logmessage;
+        delete out.logmessage;
+      }
+      if (out.servicetype) {
+        out['component-id'] = out.servicetype;
+        delete out.servicetype;
+      }
+
+      tdata.push(out);
     });
 
     bindDataToTimeline(true, true);
