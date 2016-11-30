@@ -6,3 +6,11 @@ It depends on services logging according to the [Standard Log Format](https://wi
 
 The service is deployed on the `opengrok` machine, in `/var/www/request-timeline`.  It automatically updates to the latest `master` code
 every 10 minutes via a job in `/etc/cron.d/request-timeline`.
+
+Development Setup
+-----------------
+
+    npm install
+    npm run compile
+    npm install bower
+    node_modules/bower/bin/bower install
