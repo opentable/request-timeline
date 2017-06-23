@@ -9,9 +9,10 @@
   ];
   var MS_PER_DAY = 24*60*60*1000;
   var SEARCH_WINDOW = 2 * MS_PER_DAY;
+
   var tdata = [];
+  var incomingData = [];
   var outgoingData = [];
-  var requestData = [];
 
   var $table = $('#logs').dataTable({
     columns: [
@@ -52,19 +53,19 @@
     showMessage(element && element.msg);
   });
 
-  $('#toggleLogType #outgoing').on('click', function () {
-    var outgoingState = !$('#toggleLogType #outgoing').hasClass('active');
-    var requestState = $('#toggleLogType #request').hasClass('active');
-
-    bindDataToTimeline(outgoingState, requestState);
-  });
-
-  $('#toggleLogType #request').on('click', function () {
+  $('#toggleLogType #incoming').on('click', function () {
+    var incomingState = !$('#toggleLogType #incoming').hasClass('active');
     var outgoingState = $('#toggleLogType #outgoing').hasClass('active');
-    var requestState = !$('#toggleLogType #request').hasClass('active');
 
-    bindDataToTimeline(outgoingState, requestState);
+    bindDataToTimeline(incomingState, outgoingState);
   });
+  $('#toggleLogType #outgoing').on('click', function () {
+    var incomingState = $('#toggleLogType #incoming').hasClass('active');
+    var outgoingState = !$('#toggleLogType #outgoing').hasClass('active');
+
+    bindDataToTimeline(incomingState, outgoingState);
+  });
+
 
   function request(requestId, searchdate) {
     var around = Date.parse(searchdate);
@@ -144,8 +145,8 @@
     $("#duration").text(timeSpent + " ms");
 
     tdata = [];
+    incomingData = [];
     outgoingData = [];
-    requestData = [];
 
     hits.forEach(function(doc) {
       var msg = doc['_source'];
@@ -154,7 +155,7 @@
         outgoingData.push(populateTimelineRequest(msg));
         break;
       case 'request':
-        requestData.push(populateTimelineRequest(msg));
+        incomingData.push(populateTimelineRequest(msg));
         break;
       }
 
@@ -214,23 +215,23 @@
     return ret;
   }
 
-  function bindDataToTimeline(bindOutgoing, bindRequest) {
+  function bindDataToTimeline(bindOutgoing, bindIncoming) {
     timelineData.clear();
     timelineDataGroups.clear();
 
     var numberOfRequests;
-    if (bindOutgoing && !bindRequest) {
+    if (bindOutgoing && !bindIncoming) {
       numberOfRequests = outgoingData.length;
       timelineData.add(outgoingData);
     } 
-    else if (!bindOutgoing && bindRequest) {
-      numberOfRequests = requestData.length;
-      timelineData.add(requestData);
+    else if (!bindOutgoing && bindIncoming) {
+      numberOfRequests = incomingData.length;
+      timelineData.add(incomingData);
     }
-    else if (bindOutgoing && bindRequest) {
-      numberOfRequests = requestData.length + outgoingData.length;
+    else if (bindOutgoing && bindIncoming) {
+      numberOfRequests = incomingData.length + outgoingData.length;
       timelineData.add(outgoingData);
-      timelineData.add(requestData);
+      timelineData.add(incomingData);
     }
 
     $("#nreqs").text(numberOfRequests);
