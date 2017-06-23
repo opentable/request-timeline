@@ -41,6 +41,25 @@
   </div>
   <div class="container" id="timeline-content">
     <div class="header-wrapper">
+      <p>
+        Only log entries that have the <code>url</code> and
+        <code>duration</code> fields (our proxy for whether the message
+        accords to <strong>http-v1</strong>) will be displayed
+        graphically, and will be broken down by <em>incoming</em> and
+        <em>outgoing</em> (according to the <strong>http-v1</strong>
+        <code>incoming</code> boolean field), as well as log entries
+        missing that delineation
+        <!--
+          Hair space after italic r to avoid colliding with right paren.
+        -->
+        (<em>other</em>&#8202;).
+        <em>All</em> log entries will be displayed in the lower table.
+      </p>
+      <p>
+        Timeline queries both legacy and loglov3, so duplicate entries
+        may appear if services with the desired request ID are present
+        in both systems.
+      </p>
       <div class="btn-group" data-toggle="buttons" id="toggleLogType">
         <label class="btn btn-primary active" id="incoming">
           <input type="checkbox" autocomplete="off" checked> Incoming
