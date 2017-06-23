@@ -158,43 +158,60 @@
         break;
       }
 
-      // Run through all message fields, stringify those that need it,
-      // conditionally truncate, put results in out.
-      var out = {};
-      for (var key in msg) if (msg.hasOwnProperty(key)) {
-        var value = msg[key];
-        switch (typeof value) {
-        case 'object':
-          value = JSON.stringify(value);
-          break;
-        case 'function':
-        case 'symbol':
-          value = value.toString();
-          break;
-        }
-        if (typeof value == 'string') {
-          if (value.length > 512) {
-            value = value.substring(0, 512) + '...';
-          }
-          value = _.escape(value);
-        }
-        out[key] = value;
-      }
-
-      // Normalize table-needed data in V2 "schema" to match V3 (ot-v1) schema.
-      if (out.logmessage) {
-        out.message = out.logmessage;
-        delete out.logmessage;
-      }
-      if (out.servicetype) {
-        out['component-id'] = out.servicetype;
-        delete out.servicetype;
-      }
-
-      tdata.push(out);
+      tdata.push(normalize(msg));
     });
 
     bindDataToTimeline(true, true);
+  }
+
+  // Run through all message fields, stringify those that need it,
+  // conditionally truncate, massage from legacy to loglov3, put results
+  // in out.
+  function normalize(msg) {
+    var ret = {};
+    for (var key in msg) if (msg.hasOwnProperty(key)) {
+      var value = msg[key];
+      switch (typeof value) {
+      case 'object':
+        value = JSON.stringify(value);
+        break;
+      case 'function':
+      case 'symbol':
+        value = value.toString();
+        break;
+      }
+      if (typeof value == 'string') {
+        if (value.length > 512) {
+          value = value.substring(0, 512) + '...';
+        }
+        value = _.escape(value);
+      }
+      ret[key] = value;
+    }
+
+    // Normalize data in V2 "schema" to match V3 (ot-v1, etc.) schema,
+    // be most useful for table display.
+
+    var sev = ret.severity;
+    if (!sev) sev = ret.method;
+    ret.severity = sev;
+
+    var message = ret.message;
+    if (!message) message = ret.logmessage;
+    // Use url as message for http-v1 entries.
+    if (!message) message = ret.url;
+    delete ret.logmessage;
+    ret.message = message;
+
+    var componentId = ret['component-id'];
+    function badcid() { return !componentId || componentId == 'unknown'; }
+    if (badcid()) componentId = msg.servicetype;
+    if (badcid()) componentId = msg['service-type'];
+    delete msg.servicetype;
+    delete msg['service-type'];
+    ret['component-id'] = componentId;
+
+    return ret;
   }
 
   function bindDataToTimeline(bindOutgoing, bindRequest) {
