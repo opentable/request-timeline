@@ -273,7 +273,9 @@
       },
       content: {
         text: function() {
-          return _.escape($(this).text());
+          // Escape unnecessary since normalize already escapes
+          // everything.
+          return $(this).text();
         }
       }
     });
@@ -310,7 +312,8 @@
 
     var duration = Math.max(msg.duration/1000 || msg.durationms, 1); // hack until we all migrate
     timelineRequestItem = {
-      "content": _.escape(title),
+      // Escape unnecessary since normalize already escapes everything.
+      "content": title,
       "group": componentId || "unknown",
       "start": new Date(when - duration),
       "end": new Date(when),
@@ -328,7 +331,11 @@
         if (typeof value === "object") {
           value = JSON.stringify(value);
         }
-        text += "<span class=\"jk\">\"" + key + "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" + _.escape(value) + "\"</span><br/>";
+        text += "<span class=\"jk\">\"" + key +
+          "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" +
+          // Escape unnecessary since normalize already escapes
+          // everything.
+          value + "\"</span><br/>";
       });
       $('#myModal .modal-body').html(text);
       $('#myModal').modal('show');
