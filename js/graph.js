@@ -285,12 +285,11 @@
       console.log("Refusing " + JSON.stringify(msg));
       return;
     }
-    var timelineRequestItem;
+    var componentId = msg['component-id'];
     var title;
-    var referrer = msg.servicetype;
-    if (referrer) {
-      title = referrer + ":" + msg.url;
-    } else{
+    if (componentId) {
+      title = componentId + ":" + msg.url;
+    } else {
       title = msg.url;
     }
 
@@ -312,7 +311,7 @@
     var duration = Math.max(msg.duration/1000 || msg.durationms, 1); // hack until we all migrate
     timelineRequestItem = {
       "content": _.escape(title),
-      "group": referrer || "unknown",
+      "group": componentId || "unknown",
       "start": new Date(when - duration),
       "end": new Date(when),
       "msg": msg,
