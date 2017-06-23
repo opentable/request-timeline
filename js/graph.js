@@ -284,7 +284,7 @@
   function populateTimelineRequest(msg) {
     var when = Date.parse(msg['@timestamp']);
     if (!when) {
-      console.log("Refusing " + JSON.stringify(msg));
+      console.log("Not populating timeline with " + JSON.stringify(msg));
       return;
     }
     var componentId = msg['component-id'];
