@@ -13,6 +13,7 @@
   var tdata = [];
   var incomingData = [];
   var outgoingData = [];
+  var otherData = [];
 
   var $table = $('#logs').dataTable({
     columns: [
@@ -56,16 +57,21 @@
   $('#toggleLogType #incoming').on('click', function () {
     var incomingState = !$('#toggleLogType #incoming').hasClass('active');
     var outgoingState = $('#toggleLogType #outgoing').hasClass('active');
-
-    bindDataToTimeline(incomingState, outgoingState);
+    var otherState = $('#toggleLogType #other').hasClass('active');
+    bindDataToTimeline(incomingState, outgoingState, otherState);
   });
   $('#toggleLogType #outgoing').on('click', function () {
     var incomingState = $('#toggleLogType #incoming').hasClass('active');
     var outgoingState = !$('#toggleLogType #outgoing').hasClass('active');
-
-    bindDataToTimeline(incomingState, outgoingState);
+    var otherState = $('#toggleLogType #other').hasClass('active');
+    bindDataToTimeline(incomingState, outgoingState, otherState);
   });
-
+  $('#toggleLogType #other').on('click', function () {
+    var incomingState = $('#toggleLogType #incoming').hasClass('active');
+    var outgoingState = $('#toggleLogType #outgoing').hasClass('active');
+    var otherState = !$('#toggleLogType #other').hasClass('active');
+    bindDataToTimeline(incomingState, outgoingState, otherState);
+  });
 
   function request(requestId, searchdate) {
     var around = Date.parse(searchdate);
@@ -147,22 +153,29 @@
     tdata = [];
     incomingData = [];
     outgoingData = [];
+    otherData = [];
 
     hits.forEach(function(doc) {
-      var msg = doc['_source'];
-      switch (msg.logname) {
-      case 'outgoing':
-        outgoingData.push(populateTimelineRequest(msg));
-        break;
-      case 'request':
-        incomingData.push(populateTimelineRequest(msg));
-        break;
+      var msg = normalize(doc['_source']);
+      // Use 'url', 'duration', and 'incoming' fields from http-v1 OTL.
+      var probablyHttpV1 = msg.duration !== undefined && msg.url !== undefined;
+      if (probablyHttpV1) {
+        var pushList;
+        if (msg.incoming == true) {
+          pushList = incomingData;
+        } else if (msg.incoming == false) {
+          pushList = outgoingData;
+        } else {
+          pushList = otherData;
+        }
+        pushList.push(populateTimelineRequest(msg));
       }
+      // Otherwise, we won't display this log entry graphically.
 
-      tdata.push(normalize(msg));
+      tdata.push(msg);
     });
 
-    bindDataToTimeline(true, true);
+    bindDataToTimeline(true, true, true);
   }
 
   // Run through all message fields, stringify those that need it,
@@ -215,26 +228,22 @@
     return ret;
   }
 
-  function bindDataToTimeline(bindOutgoing, bindIncoming) {
+  function bindDataToTimeline(bindIncoming, bindOutgoing, bindOther) {
     timelineData.clear();
     timelineDataGroups.clear();
 
-    var numberOfRequests;
-    if (bindOutgoing && !bindIncoming) {
-      numberOfRequests = outgoingData.length;
-      timelineData.add(outgoingData);
-    } 
-    else if (!bindOutgoing && bindIncoming) {
-      numberOfRequests = incomingData.length;
-      timelineData.add(incomingData);
+    var graphEntries = 0;
+    function process(condition, data) {
+      if (condition) {
+        graphEntries += data.length;
+        timelineData.add(data);
+      }
     }
-    else if (bindOutgoing && bindIncoming) {
-      numberOfRequests = incomingData.length + outgoingData.length;
-      timelineData.add(outgoingData);
-      timelineData.add(incomingData);
-    }
+    process(bindIncoming, incomingData);
+    process(bindOutgoing, outgoingData);
+    process(bindOther, otherData);
 
-    $("#nreqs").text(numberOfRequests);
+    $("#nreqs").text(graphEntries);
 
     timelineData.forEach(function(item) {
       if (!timelineDataGroups.get(item.group)) {
