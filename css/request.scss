@@ -38,9 +38,8 @@ table#logs tr {
 .vis-timeline .vis-item:not(.vis-selected).httpError {
   background-color: red;
 }
-
-.vis-timeline .vis-item:not(.vis-selected).request {
-  background-color: #B562CF !important;
+.vis-timeline .vis-item:not(.vis-selected).statusOther {
+  background-color: #B562CF;
 }
 
 body {

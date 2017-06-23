@@ -293,14 +293,22 @@
     } else{
       title = msg.url;
     }
-    var cssClass = "httpSuccess " + msg.logname;
+
+    var cssClass;
     var sc = msg.status;
-    if (sc >= 300 && sc < 400) {
+    if (sc === undefined) {
+      cssClass = "statusOther";
+    } else if (sc >= 200 && sc < 300) {
+      cssClass = "httpSuccess";
+    } else if (sc >= 300 && sc < 400) {
       cssClass = "httpRedirect";
-    }
-    if (sc >= 400 || typeof sc === 'undefined') {
+    } else if (sc >= 400) {
       cssClass = "httpError";
+    } else {
+      // 1xx, other weird values.
+      cssClass = "statusOther";
     }
+
     var duration = Math.max(msg.duration/1000 || msg.durationms, 1); // hack until we all migrate
     timelineRequestItem = {
       "content": _.escape(title),
