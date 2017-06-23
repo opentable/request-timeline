@@ -243,7 +243,8 @@
     process(bindOutgoing, outgoingData);
     process(bindOther, otherData);
 
-    $("#nreqs").text(graphEntries);
+    $("#ngentries").text(graphEntries);
+    $("#ntentries").text(tdata.length);
 
     timelineData.forEach(function(item) {
       if (!timelineDataGroups.get(item.group)) {
