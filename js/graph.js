@@ -15,17 +15,19 @@
   var outgoingData = [];
   var otherData = [];
 
+  // severity and message are overridden to show the method and url,
+  // if not present.
   var $table = $('#logs').dataTable({
     columns: [
       {
         data: '@timestamp'
       },
       {
-        data: 'severity',
+        data: 'component-id',
         defaultContent: '__missing__'
       },
       {
-        data: 'component-id',
+        data: 'severity',
         defaultContent: '__missing__'
       },
       {
