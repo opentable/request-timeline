@@ -33,6 +33,9 @@
         data: '@timestamp'
       },
       {
+        data: '__loglov3__'
+      },
+      {
         data: 'component-id',
         defaultContent: '__missing__'
       },
