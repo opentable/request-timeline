@@ -1,12 +1,22 @@
 (function() {
+  // Object for quick lookup.
+  var LEGACY_SERVERS = {
+    "http://es-logging.otenv.com:9200/": true,
+    "http://es-logging-qa.otenv.com:9200/": true
+  };
   var SERVERS = [
-    // Legacy.
-    "http://es-logging.otenv.com:9200/",
-    "http://es-logging-qa.otenv.com:9200/",
     // loglov3.
     "http://loglov3-logging-qa.otenv.com:9200/",
     "http://loglov3-logging-prod.otenv.com:9200/"
   ];
+  // Put legacy entries into servers array.
+  (function() {
+    for (var legacy in LEGACY_SERVERS)
+      if (LEGACY_SERVERS.hasOwnProperty(legacy)) {
+        SERVERS.push(legacy);
+      }
+  })();
+
   var MS_PER_DAY = 24*60*60*1000;
   var SEARCH_WINDOW = 2 * MS_PER_DAY;
 
@@ -98,6 +108,7 @@
           sort: "@timestamp:asc",
           size: 10000
         },
+        context: server
       });
     }))
     .always(onFinished)
@@ -105,7 +116,18 @@
       alert("Error: " + textStatus + " " + errorThrown);
     })
     .then(function() {
-      return _.reduce(arguments, function(result, item) { return result.concat(item[0].hits.hits); }, []);
+      var docs = []; // All documents, with __server__ key added.
+      for (var i = 0; i < arguments.length; ++i) {
+        var server = this[i]; // See context above.
+        var item = arguments[i];
+        var hits = item[0].hits.hits;
+        for (var j = 0; j < hits.length; ++j) {
+          var doc = hits[j];
+          doc.__server__ = server;
+          docs.push(doc);
+        }
+      }
+      return docs;
     })
     .then(function (hits) {
       onSuccess(hits, requestId, searchdate, start);
