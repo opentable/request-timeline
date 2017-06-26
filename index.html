@@ -27,7 +27,7 @@
       <div class="navbar-collapse collapse">
         <form class="navbar-form navbar-right" role="form">
           <div class="form-group">
-              <input type="search" id="requestid" placeholder="Request Id" autocomplete="false" autofocus="true" required="true" size=40 class="form-control" />
+              <input type="search" id="requestid" placeholder="Request ID" autocomplete="false" autofocus="true" required="true" size=40 class="form-control" />
           </div>
           <div class="form-group">
               <input type="text" id="searchdate" class="form-control" />
@@ -41,18 +41,41 @@
   </div>
   <div class="container" id="timeline-content">
     <div class="header-wrapper">
+      <p>
+        Only log entries that have the <code>url</code> and
+        <code>duration</code> fields (our proxy for whether the message
+        accords to <strong>http-v1</strong>) will be displayed
+        graphically, and will be broken down by <em>incoming</em> and
+        <em>outgoing</em> (according to the <strong>http-v1</strong>
+        <code>incoming</code> boolean field), as well as log entries
+        missing that delineation
+        <!--
+          Hair space after italic r to avoid colliding with right paren.
+        -->
+        (<em>other</em>&#8202;).
+        <em>All</em> log entries will be displayed in the lower table.
+      </p>
+      <p>
+        Timeline queries both legacy and loglov3, so duplicate entries
+        may appear if services with the desired request ID are present
+        in both systems.
+      </p>
       <div class="btn-group" data-toggle="buttons" id="toggleLogType">
+        <label class="btn btn-primary active" id="incoming">
+          <input type="checkbox" autocomplete="off" checked> Incoming
+        </label>
         <label class="btn btn-primary active" id="outgoing">
           <input type="checkbox"  autocomplete="off" checked> Outgoing
         </label>
-        <label class="btn btn-primary active" id="request">
-          <input type="checkbox" autocomplete="off" checked> Request
+        <label class="btn btn-primary active" id="other">
+          <input type="checkbox" autocomplete="off" checked> Other
         </label>
       </div>
 
       <div id="metadata">
         Query took: <span id="duration">00000ms</span>,
-        requests: <span id="nreqs">0</span>
+        graphed entries: <span id="ngentries">0</span>,
+        total entries: <span id="ntentries">0</span>
       </div>
     </div>
 
@@ -61,9 +84,9 @@
     <table id="logs" class="table table-striped">
       <thead>
         <th>Timestamp</th>
-        <th id="table-severity">Severity</th>
-        <th id="table-servicetype">Service Type</th>
-        <th id="table-logmessage">Logmessage</th>
+        <th id="table-componentid">Component ID</th>
+        <th id="table-severity">Severity/Method</th>
+        <th id="table-message">Message/URL</th>
       </thead>
       <tbody>
       </tbody>

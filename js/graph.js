@@ -1,22 +1,33 @@
 (function() {
-  var SERVERS = ["http://es-logging.otenv.com:9200/", "http://es-logging-qa.otenv.com:9200/", "http://loglov3-logging-qa.otenv.com:9200/", "http://loglov3-logging-prod.otenv.com:9200/"];
+  var SERVERS = [
+    // Legacy.
+    "http://es-logging.otenv.com:9200/",
+    "http://es-logging-qa.otenv.com:9200/",
+    // loglov3.
+    "http://loglov3-logging-qa.otenv.com:9200/",
+    "http://loglov3-logging-prod.otenv.com:9200/"
+  ];
   var MS_PER_DAY = 24*60*60*1000;
   var SEARCH_WINDOW = 2 * MS_PER_DAY;
-  var tdata = [];
-  var outgoingData = [];
-  var requestData = [];
 
+  var tdata = [];
+  var incomingData = [];
+  var outgoingData = [];
+  var otherData = [];
+
+  // severity and message are overridden to show the method and url,
+  // if not present.
   var $table = $('#logs').dataTable({
     columns: [
       {
         data: '@timestamp'
       },
       {
-        data: 'severity',
+        data: 'component-id',
         defaultContent: '__missing__'
       },
       {
-        data: 'component-id',
+        data: 'severity',
         defaultContent: '__missing__'
       },
       {
@@ -45,18 +56,23 @@
     showMessage(element && element.msg);
   });
 
-  $('#toggleLogType #outgoing').on('click', function () {
-    var outgoingState = !$('#toggleLogType #outgoing').hasClass('active');
-    var requestState = $('#toggleLogType #request').hasClass('active');
-
-    bindDataToTimeline(outgoingState, requestState);
-  });
-
-  $('#toggleLogType #request').on('click', function () {
+  $('#toggleLogType #incoming').on('click', function () {
+    var incomingState = !$('#toggleLogType #incoming').hasClass('active');
     var outgoingState = $('#toggleLogType #outgoing').hasClass('active');
-    var requestState = !$('#toggleLogType #request').hasClass('active');
-
-    bindDataToTimeline(outgoingState, requestState);
+    var otherState = $('#toggleLogType #other').hasClass('active');
+    bindDataToTimeline(incomingState, outgoingState, otherState);
+  });
+  $('#toggleLogType #outgoing').on('click', function () {
+    var incomingState = $('#toggleLogType #incoming').hasClass('active');
+    var outgoingState = !$('#toggleLogType #outgoing').hasClass('active');
+    var otherState = $('#toggleLogType #other').hasClass('active');
+    bindDataToTimeline(incomingState, outgoingState, otherState);
+  });
+  $('#toggleLogType #other').on('click', function () {
+    var incomingState = $('#toggleLogType #incoming').hasClass('active');
+    var outgoingState = $('#toggleLogType #outgoing').hasClass('active');
+    var otherState = !$('#toggleLogType #other').hasClass('active');
+    bindDataToTimeline(incomingState, outgoingState, otherState);
   });
 
   function request(requestId, searchdate) {
@@ -137,79 +153,100 @@
     $("#duration").text(timeSpent + " ms");
 
     tdata = [];
+    incomingData = [];
     outgoingData = [];
-    requestData = [];
+    otherData = [];
 
     hits.forEach(function(doc) {
-      var msg = doc['_source'];
-      switch (msg.logname) {
-      case 'outgoing':
-        outgoingData.push(populateTimelineRequest(msg));
-        break;
-      case 'request':
-        requestData.push(populateTimelineRequest(msg));
-        break;
-      }
-
-      // Run through all message fields, stringify those that need it,
-      // conditionally truncate, put results in out.
-      var out = {};
-      for (var key in msg) if (msg.hasOwnProperty(key)) {
-        var value = msg[key];
-        switch (typeof value) {
-        case 'object':
-          value = JSON.stringify(value);
-          break;
-        case 'function':
-        case 'symbol':
-          value = value.toString();
-          break;
+      var msg = normalize(doc['_source']);
+      // Use 'url', 'duration', and 'incoming' fields from http-v1 OTL.
+      var probablyHttpV1 = msg.duration !== undefined && msg.url !== undefined;
+      if (probablyHttpV1) {
+        var pushList;
+        if (msg.incoming == true) {
+          pushList = incomingData;
+        } else if (msg.incoming == false) {
+          pushList = outgoingData;
+        } else {
+          pushList = otherData;
         }
-        if (typeof value == 'string') {
-          if (value.length > 512) {
-            value = value.substring(0, 512) + '...';
-          }
-          value = _.escape(value);
-        }
-        out[key] = value;
+        pushList.push(populateTimelineRequest(msg));
       }
+      // Otherwise, we won't display this log entry graphically.
 
-      // Normalize table-needed data in V2 "schema" to match V3 (ot-v1) schema.
-      if (out.logmessage) {
-        out.message = out.logmessage;
-        delete out.logmessage;
-      }
-      if (out.servicetype) {
-        out['component-id'] = out.servicetype;
-        delete out.servicetype;
-      }
-
-      tdata.push(out);
+      tdata.push(msg);
     });
 
-    bindDataToTimeline(true, true);
+    bindDataToTimeline(true, true, true);
   }
 
-  function bindDataToTimeline(bindOutgoing, bindRequest) {
+  // Run through all message fields, stringify those that need it,
+  // conditionally truncate, massage from legacy to loglov3, put results
+  // in out.
+  function normalize(msg) {
+    var ret = {};
+    for (var key in msg) if (msg.hasOwnProperty(key)) {
+      var value = msg[key];
+      switch (typeof value) {
+      case 'object':
+        value = JSON.stringify(value);
+        break;
+      case 'function':
+      case 'symbol':
+        value = value.toString();
+        break;
+      }
+      if (typeof value == 'string') {
+        if (value.length > 512) {
+          value = value.substring(0, 512) + '...';
+        }
+        value = _.escape(value);
+      }
+      ret[key] = value;
+    }
+
+    // Normalize data in V2 "schema" to match V3 (ot-v1, etc.) schema,
+    // be most useful for table display.
+
+    var sev = ret.severity;
+    if (!sev) sev = ret.method;
+    ret.severity = sev;
+
+    var message = ret.message;
+    if (!message) message = ret.logmessage;
+    // Use url as message for http-v1 entries.
+    if (!message) message = ret.url;
+    delete ret.logmessage;
+    ret.message = message;
+
+    var componentId = ret['component-id'];
+    function badcid() { return !componentId || componentId == 'unknown'; }
+    if (badcid()) componentId = msg.servicetype;
+    if (badcid()) componentId = msg['service-type'];
+    delete msg.servicetype;
+    delete msg['service-type'];
+    ret['component-id'] = componentId;
+
+    return ret;
+  }
+
+  function bindDataToTimeline(bindIncoming, bindOutgoing, bindOther) {
     timelineData.clear();
     timelineDataGroups.clear();
 
-    var numberOfRequests;
-    if (bindOutgoing && !bindRequest) {
-      numberOfRequests = outgoingData.length;
-      timelineData.add(outgoingData);
-    } 
-    else if (!bindOutgoing && bindRequest) {
-      numberOfRequests = requestData.length;
-      timelineData.add(requestData);
+    var graphEntries = 0;
+    function process(condition, data) {
+      if (condition) {
+        graphEntries += data.length;
+        timelineData.add(data);
+      }
     }
-    else if (bindOutgoing && bindRequest) {
-      numberOfRequests = requestData.length + outgoingData.length;
-      timelineData.add(outgoingData);
-      timelineData.add(requestData);
-    }
+    process(bindIncoming, incomingData);
+    process(bindOutgoing, outgoingData);
+    process(bindOther, otherData);
 
-    $("#nreqs").text(numberOfRequests);
+    $("#ngentries").text(graphEntries);
+    $("#ntentries").text(tdata.length);
 
     timelineData.forEach(function(item) {
       if (!timelineDataGroups.get(item.group)) {
@@ -236,44 +273,53 @@
       },
       content: {
         text: function() {
-          return _.escape($(this).text());
+          // Escape unnecessary since normalize already escapes
+          // everything.
+          return $(this).text();
         }
       }
     });
   }
 
   function populateTimelineRequest(msg) {
-    var timelineRequestItem;
     var when = Date.parse(msg['@timestamp']);
-    if (when) {
-      var title;
-      var referrer = msg.servicetype;
-      if (referrer) {
-        title = referrer + ":" + msg.url;
-      } else{
-        title = msg.url;
-      }
-      var cssClass = "httpSuccess " + msg.logname;
-      var sc = msg.status;
-      if (sc >= 300 && sc < 400) {
-        cssClass = "httpRedirect";
-      }
-      if (sc >= 400 || typeof sc === 'undefined') {
-        cssClass = "httpError";
-      }
-      var duration = Math.max(msg.duration/1000 || msg.durationms, 1); // hack until we all migrate
-      timelineRequestItem = {
-        "content": _.escape(title),
-        "group": referrer || "unknown",
-        "start": new Date(when - duration),
-        "end": new Date(when),
-        "msg": msg,
-        "className": cssClass
-      };
-    } 
-    else {
-      console.log("Refusing " + JSON.stringify(msg));
+    if (!when) {
+      console.log("Not populating timeline with " + JSON.stringify(msg));
+      return;
     }
+    var componentId = msg['component-id'];
+    var title;
+    if (componentId) {
+      title = componentId + ":" + msg.url;
+    } else {
+      title = msg.url;
+    }
+
+    var cssClass;
+    var sc = msg.status;
+    if (sc === undefined) {
+      cssClass = "statusOther";
+    } else if (sc >= 200 && sc < 300) {
+      cssClass = "httpSuccess";
+    } else if (sc >= 300 && sc < 400) {
+      cssClass = "httpRedirect";
+    } else if (sc >= 400) {
+      cssClass = "httpError";
+    } else {
+      // 1xx, other weird values.
+      cssClass = "statusOther";
+    }
+
+    var duration = Math.max(msg.duration/1000 || msg.durationms, 1); // hack until we all migrate
+    timelineRequestItem = {
+      // Escape unnecessary since normalize already escapes everything.
+      "content": title,
+      "group": componentId || "unknown",
+      "start": new Date(when - duration),
+      "end": new Date(when),
+      "msg": msg,
+      "className": cssClass
+    };
     return timelineRequestItem;
   }
 
@@ -285,7 +331,11 @@
         if (typeof value === "object") {
           value = JSON.stringify(value);
         }
-        text += "<span class=\"jk\">\"" + key + "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" + _.escape(value) + "\"</span><br/>";
+        text += "<span class=\"jk\">\"" + key +
+          "\"</span><span class=\"jc\">: </span><span class=\"jv\">\"" +
+          // Escape unnecessary since normalize already escapes
+          // everything.
+          value + "\"</span><br/>";
       });
       $('#myModal .modal-body').html(text);
       $('#myModal').modal('show');
