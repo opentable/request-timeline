@@ -181,8 +181,8 @@
   }
 
   // Run through all message fields, stringify those that need it,
-  // conditionally truncate, massage from legacy to loglov3, put results
-  // in out.
+  // conditionally truncate, massage from legacy to loglov3, dupe up use
+  // of severity/message fields for table display, return new object.
   function normalize(msg) {
     var ret = {};
     for (var key in msg) if (msg.hasOwnProperty(key)) {
