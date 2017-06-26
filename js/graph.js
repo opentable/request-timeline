@@ -180,7 +180,7 @@
     otherData = [];
 
     hits.forEach(function(doc) {
-      var msg = normalize(doc['_source']);
+      var msg = normalize(doc.__server__, doc['_source']);
       // Use 'url', 'duration', and 'incoming' fields from http-v1 OTL.
       var probablyHttpV1 = msg.duration !== undefined && msg.url !== undefined;
       if (probablyHttpV1) {
@@ -205,7 +205,7 @@
   // Run through all message fields, stringify those that need it,
   // conditionally truncate, massage from legacy to loglov3, dupe up use
   // of severity/message fields for table display, return new object.
-  function normalize(msg) {
+  function normalize(server, msg) {
     var ret = {};
     for (var key in msg) if (msg.hasOwnProperty(key)) {
       var value = msg[key];
@@ -248,6 +248,10 @@
     delete msg.servicetype;
     delete msg['service-type'];
     ret['component-id'] = componentId;
+
+    var legacy = !!LEGACY_SERVERS[server];
+    // Unicode/emoji: warning triangle or green check.
+    ret.__loglov3__ = legacy ? '⚠️' : '✅';
 
     return ret;
   }
