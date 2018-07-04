@@ -1,0 +1,22 @@
+{
+    "requestId": "ot-timeline",
+    "resources": {
+        "cpus": .01,
+        "memoryMb": 512,
+        "numPorts": 2
+    },
+    "containerInfo": {
+    "docker": {
+      "privileged": true,
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "hostPortType": "FROM_OFFER",
+          "hostPort": 0,
+          "containerPortType": "LITERAL",
+          "containerPort": 8080
+        }
+      ]
+    }
+  }
+}

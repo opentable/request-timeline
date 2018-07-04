@@ -1,0 +1,24 @@
+#!/bin/sh -ex
+
+deploy=$(date +%Y%m%d%H%M%S)
+version=1
+
+echo "building ..."
+docker pull docker.otenv.com/ot-ubuntu:18-latest
+DIR=`dirname $0`
+cd $DIR
+DIR=`pwd`
+TEMP=`mktemp -d`
+baretag=ot-timeline
+tag=${deploy}_${version}
+docker_repo=docker.otenv.com/$baretag
+image_tag=$docker_repo:$tag
+
+echo "Build docker image ${image_tag}"
+docker build -t $image_tag $DIR
+echo "Push docker image"
+docker push $docker_repo:$tag
+echo image tag $image_tag
+echo docker repo $docker_repo
+echo tag $tag
+echo "otpl-deploy -u -d ${baretag} prod-sc  ${tag}" > $DIR/deploy/deploy.sh

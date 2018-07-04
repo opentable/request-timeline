@@ -5,12 +5,22 @@ This application displays log entries representing HTTP requests
 visually on a timeline.  It depends on services logging according to the
 [common OTLs][1]--specifically, ot-v1, msg-v1, and http-v1.
 
-TODO: Wrap in Node express
-TODO: announce discovery
+On singularity it advertises as `ot-timeline`
 
 
-Development Setup
------------------
+To build a docker image using currently installed components
+------------------------------------------------------------
+
+	build
+
+To deploy
+---------
+
+	Run deploy.sh from deploy subdirectory
+
+
+To update modules (rarely needed)
+--------------------------------
 
     npm install bower
     node_modules/bower/bin/bower install
