@@ -5,6 +5,9 @@
         "memoryMb": 512,
         "numPorts": 2
     },
+    "healthcheck": {
+     "uri": "/index.html"
+   },
     "containerInfo": {
     "docker": {
       "privileged": true,

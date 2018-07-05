@@ -5,5 +5,9 @@
     "visibility@opentable.com"
   ],
   "instances": 1,
-  "skipHealthchecks": true
+  "healthcheck": {
+		"startupTimeoutSeconds": 180,
+ 		"startupDelaySeconds": 15,
+ 		"startupIntervalSeconds": 1
+ }
 }
