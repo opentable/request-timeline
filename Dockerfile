@@ -27,4 +27,5 @@ COPY bower_components ${TIMELINE}/bower_components
 # link our site
 RUN ln -s ${TIMELINE} /var/www/timeline && ln -s ${SCRIPTS}/timeline.conf ${NGINX}/sites-available/timeline.conf && ln -s  ${SCRIPTS}/timeline.conf ${NGINX}/sites-enabled/timeline.conf && rm ${NGINX}/sites-enabled/default && rm ${NGINX}/sites-available/default
 
-CMD [ "/bin/bash", "-c", "${SCRIPTS}/start.sh 2>&1" ]
+#CMD [ "/bin/bash", "-c", "${SCRIPTS}/start.sh 2>&1" ]
+ENTRYPOINT [ "/usr/bin/dumb-init", "/srv/scripts/start.sh", "2>&1" ]
