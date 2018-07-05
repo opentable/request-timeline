@@ -2,7 +2,7 @@
     "requestId": "ot-timeline",
     "resources": {
         "cpus": .01,
-        "memoryMb": 512,
+        "memoryMb": 256,
         "numPorts": 2
     },
     "healthcheck": {
