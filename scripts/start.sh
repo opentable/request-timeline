@@ -6,4 +6,5 @@ cd $DIR
 echo "Restart nginx"
 service nginx restart
 echo "Run wrapper"
-$DIR/discovery-wrapper -t ot-timeline -s http -w 10 $DIR/sleep.sh
+cd /srv/scripts
+./discovery-wrapper -t ot-timeline -s http -w 10 /bin/bash -c /srv/scripts/sleep.sh
