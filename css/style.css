@@ -1,0 +1,166 @@
+/*
+================================================================================
+SPINNERS
+================================================================================
+A Sass mixin to generate a pure CSS3 loading/busy indicator.
+https://github.com/franzheidl/spinners
+Franz Heidl 2014
+MIT License
+--------------------------------------------------------------------------------
+USAGE
+
+Default:
+
+.my-spinner {
+ @include spinner();
+}
+
+
+Custom:
+
+.my-spinner {
+ @include spinner(1.25em, 3px solid #555, .7s, background rgba(0, 0, 0, .2);
+}
+
+All arguments are optional.
+
+Acceppts any valid CSS dimensional declaration, e.g px, em, rem as an argument for size.
+
+Use either shorthand border declarations or individual 'border-[property] [value]' (no colon!) pairs for the style.
+
+Pass any number of seconds referring to the duration of one full rotation for animation speed.
+
+--------------------------------------------------------------------------------
+*/
+@-webkit-keyframes spinner-animation {
+  0% {
+    -webkit-transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg); } }
+
+@-moz-keyframes spinner-animation {
+  0% {
+    -moz-transform: rotate(0deg); }
+  100% {
+    -moz-transform: rotate(360deg); } }
+
+@-ms-keyframes spinner-animation {
+  0% {
+    -ms-transform: rotate(0deg); }
+  100% {
+    -ms-transform: rotate(360deg); } }
+
+@-o-keyframes spinner-animation {
+  0% {
+    -o-transform: rotate(0deg); }
+  100% {
+    -o-transform: rotate(100deg); } }
+
+@keyframes spinner-animation {
+  0% {
+    transform: rotate(0deg); }
+  100% {
+    transform: rotate(360deg); } }
+
+#logs th {
+  background-color: #f8f8f8; }
+
+#logs th a {
+  color: #333; }
+
+table#logs td {
+  overflow-wrap: break-word; }
+
+table#logs tr {
+  cursor: pointer; }
+
+#table-message {
+  width: 70%; }
+
+#table-severity {
+  width: 10%; }
+
+.ot-brand {
+  line-height: 50px;
+  font-size: 18px; }
+
+.vis-timeline .vis-item:not(.vis-selected).httpSuccess {
+  background-color: #0BE400; }
+
+.vis-timeline .vis-item:not(.vis-selected).httpRedirect {
+  background-color: blue; }
+
+.vis-timeline .vis-item:not(.vis-selected).httpError {
+  background-color: red; }
+
+.vis-timeline .vis-item:not(.vis-selected).statusOther {
+  background-color: #B562CF; }
+
+body {
+  height: 100%;
+  padding-top: 70px;
+  font-family: sans-serif !important; }
+
+html {
+  height: 100%; }
+
+.logo {
+  height: 30px; }
+
+#graph {
+  margin-bottom: 15px;
+  margin-top: 15px; }
+
+span#duration, span#renderduration, span#ngentries, span#ntentries {
+  font-weight: bold; }
+
+#metadata {
+  float: right;
+  line-height: 34px; }
+
+span.jk {
+  color: #000080; }
+
+span.jc {
+  color: #000000; }
+
+span.jv {
+  color: #df5000; }
+
+#myModal .modal-body {
+  overflow-wrap: break-word;
+  max-height: 800px;
+  overflow-y: scroll; }
+
+#progress-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%; }
+  #progress-bar .spinner {
+    background-color: transparent;
+    border: 15px solid #da3743;
+    border-radius: 50%;
+    border-top-color: transparent;
+    border-right-color: transparent;
+    width: 300px;
+    height: 300px;
+    display: inline-block;
+    vertical-align: middle;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-animation: spinner-animation 0.65s infinite linear;
+    -moz-animation: spinner-animation 0.65s infinite linear;
+    -o-animation: spinner-animation 0.65s infinite linear;
+    -ms-animation: spinner-animation 0.65s infinite linear;
+    animation: spinner-animation 0.65s infinite linear; }
+
+.qtip-content {
+  font-size: 1.5em;
+  line-height: 1.5em; }
+
+.qtip {
+  max-width: 500px !important; }

@@ -1,0 +1,189 @@
+#!/bin/sh
+
+set -o nounset -o errexit
+
+# DEFAULT ARGUMENTS
+
+ANNOUNCE_DELAY=1
+ANNOUNCE_INTERVAL=10
+METADATA_JSON="{}"
+QUIET=false
+VERBOSE=false
+CURL_VERBOSE=""
+
+# END DEFAULTS
+
+alias errcho='>&2 echo'
+die() {
+  errcho "$@"
+  exit 111
+}
+
+show_help() {
+  cat >&2 <<'HELP'
+
+Usage: discovery-wrapper [-v] [-h] [-q] [-w announce-delay] [-i announce-interval] [-d discovery-server] [-a announcement-uuid] [-f service-feature] [-m metadata-json] [-e discovery-environment] -t service-type -u service-uri <program>
+
+Launch the given program, then create an announcement in service discovery for it.
+
+-w              Sleep some number of seconds before making the initial announcement, default 1 second
+-i              Announcements must be refreshed before they expire.  Default interval is 10 seconds
+-d              Specify the discovery server.  Defaults to 'discovery-$OT_ENV.otenv.com'
+-a              Specify the announcement ID.  Defaults to a random UUID.
+-f              Specify the service feature field.  Defaults to empty.
+-m              Specify the metadata field as JSON.  Defaults to empty.
+-t              Specify the service type field
+-s              Specify the scheme and build a service URI as: "$SCHEME://$TASK_HOST:$PORT0"
+-u              Specify the service URI
+-e              Specify the discovery environment. Defaults to empty.
+-q              Quiet all non-essential output
+-v              Enable verbose output
+-h              Show this help
+
+<program>       The program and arguments to launch
+
+HELP
+  exit 254
+}
+
+while getopts ":vqhw:i:d:a:f:m:t:s:u:e:" opt; do
+  case $opt in
+    v)
+      set -o xtrace
+      VERBOSE=true
+      CURL_VERBOSE="-v"
+      ;;
+    h)
+      show_help
+      ;;
+    q)
+      QUIET=true
+      ;;
+    :)
+      errcho "OPTION -$OPTARG requres an argument" >&2
+      exit 1
+      ;;
+    \?)
+      errcho "Unrecognized option: -$OPTARG" >&2
+      exit 1
+      ;;
+    w)
+      ANNOUNCE_DELAY=$OPTARG
+      ;;
+    i)
+      ANNOUNCE_INTERVAL=$OPTARG
+      ;;
+    d)
+      DISCOVERY_SERVER=$OPTARG
+      ;;
+    a)
+      ANNOUNCE_UUID=$OPTARG
+      ;;
+    f)
+      SERVICE_FEATURE=$OPTARG
+      ;;
+    m)
+      METADATA_JSON=$OPTARG
+      ;;
+    e)
+      DISCOVERY_ENVIRONMENT=$OPTARG
+      ;;
+    t)
+      SERVICE_TYPE=$OPTARG
+      ;;
+    s)
+      SERVICE_SCHEME=$OPTARG
+      ;;
+    u)
+      SERVICE_URI=$OPTARG
+      ;;
+  esac
+done
+shift $(($OPTIND-1))
+
+if [ -n "${SERVICE_SCHEME+x}" ]; then
+  SERVICE_URI="${SERVICE_SCHEME}://${TASK_HOST}:${PORT0}"
+fi
+
+if [ -z "${ANNOUNCE_UUID+x}" ]; then
+  if [ -e /proc/sys/kernel/random/uuid ]; then
+    ANNOUNCE_UUID=$(cat /proc/sys/kernel/random/uuid)
+  else
+    ANNOUNCE_UUID=$(uuidgen)
+  fi
+fi
+
+if [ -z "${DISCOVERY_SERVER+x}" ]; then
+  DISCOVERY_SERVER="discovery-$OT_ENV.otenv.com"
+fi
+
+if [ -z "${SERVICE_TYPE+x}" ]; then
+  errcho 'You must specify service type'
+  exit 2
+fi
+
+if [ -z "${SERVICE_URI+x}" ]; then
+  errcho 'You must specify service URI'
+  exit 3
+fi
+
+# Construct JSON payload for announcement
+
+FEATURE_BIT=""
+if [ -n "${SERVICE_FEATURE+x}" ]; then
+  FEATURE_BIT=",\"feature\":\"$SERVICE_FEATURE\""
+fi
+
+ENVIRONMENT_ANNOUNCE=""
+if [ -n "${DISCOVERY_ENVIRONMENT+x}" ]; then
+  ENVIRONMENT_ANNOUNCE=",\"environment\":\"$DISCOVERY_ENVIRONMENT\""
+fi
+
+ANNOUNCE_JSON="{\"announcementId\":\"$ANNOUNCE_UUID\",\"serviceType\":\"$SERVICE_TYPE\",\"serviceUri\":\"$SERVICE_URI\",\"metadata\":${METADATA_JSON}${FEATURE_BIT}${ENVIRONMENT_ANNOUNCE}}"
+
+# Main loop of wrapper script.  Here's the theory:
+# We want to end up in a situation where we "exec" the "wrapped" program.
+# While it might be possible to fork it into a subprocess, then we have to handle
+# a lot of bookkeeping e.g. correctly handling signals, making sure we don't futz with open
+# FDs too much, correctly capturing the exit code, etc...  Additionally we will
+# break things that assume the PID is that of the wrapped process.
+
+# So let's take a different tack - we need to exec the process so that it keeps our PID,
+# but keep a "sidecar" around which handles announcing.  So we set up the loop, fork a subshell,
+# and then replace ourselves with the wrapped process.  The subshell loops until the parent terminates
+# and then removes the announcement.
+
+announce_loop() {
+  set +o errexit  # don't error out, try to be resilient
+
+  errcho "[DW] Waiting $ANNOUNCE_DELAY seconds to announce..."
+  sleep $ANNOUNCE_DELAY
+  errcho "[DW] Begin announcing: '$ANNOUNCE_JSON'"
+  COUNTDOWN=0
+  # kill -0 tests if a process is alive
+  # Check every second for parent death to clean up quickly
+  while kill -0 $$ 2>/dev/null; do
+    # Every ANNOUNCE_INTERVAL seconds, touch the announcement
+    if [ $COUNTDOWN -eq 0 ]; then
+      curl $CURL_VERBOSE -m 5 -sS -XPOST -H 'Content-Type: application/json' -d "$ANNOUNCE_JSON" --retry 5 -o /dev/null http://$DISCOVERY_SERVER/announcement
+      CURL_RESULT=$?
+      ( [ $CURL_RESULT -ne 0 ] || $VERBOSE ) && errcho "[DW] Touched announcement with result $CURL_RESULT"
+      COUNTDOWN=$ANNOUNCE_INTERVAL
+    fi
+    sleep 1
+    COUNTDOWN=$(($COUNTDOWN-1))
+  done
+  # Parent died, delete announcement
+  errcho "[DW] Child process exited, removing announcement"
+  curl $CURL_VERBOSE -m 5 -sSf -XDELETE http://$DISCOVERY_SERVER/announcement/$ANNOUNCE_UUID
+}
+
+# Fork our sidecar into a subshell
+if $QUIET ; then
+  ( announce_loop ) > /dev/null &
+else
+  ( announce_loop ) &
+fi
+
+# Boot wrapped process
+exec "$@"
