@@ -7,4 +7,4 @@ echo "Restart nginx"
 service nginx restart
 echo "Run wrapper"
 cd /srv/scripts
-./discovery-wrapper -t ot-timeline -s http -w 10 /bin/bash -c /srv/scripts/sleep.sh
+./discovery-wrapper -t timeline -s http -w 10 /bin/bash -c /srv/scripts/sleep.sh

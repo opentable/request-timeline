@@ -5,7 +5,8 @@ This application displays log entries representing HTTP requests
 visually on a timeline.  It depends on services logging according to the
 [common OTLs][1]--specifically, ot-v1, msg-v1, and http-v1.
 
-On singularity it advertises as `ot-timeline`
+On discovery it advertises as `timeline`,
+and the singularity request is `timeline` as well.
 
 
 To build a docker image using currently installed components

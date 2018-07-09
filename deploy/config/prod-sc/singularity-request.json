@@ -1,13 +1,13 @@
 {
-  "id": "ot-timeline",
+  "id": "timeline",
   "requestType": "SERVICE",
   "owners": [
     "visibility@opentable.com"
   ],
   "instances": 1,
   "healthcheck": {
-		"startupTimeoutSeconds": 180,
- 		"startupDelaySeconds": 15,
- 		"startupIntervalSeconds": 1
- }
+    "startupTimeoutSeconds": 180,
+    "startupDelaySeconds": 15,
+    "startupIntervalSeconds": 1
+  }
 }
