@@ -18,9 +18,9 @@ Development Setup
     npm install bower
     node_modules/bower/bin/bower install
 
-[1]: https://github.com/opentable/logging-loglov3-config/tree/master/otls
-
-
 #### Urls
+[http://timeline.otenv.com/](2)
 
-[http://timeline.otenv.com/]( http://timeline.otenv.com/)
+
+[1]: https://github.com/opentable/logging-loglov3-config/tree/master/otls
+[2]: https://github.com/opentable/logging-loglov3-config/tree/master/otls
