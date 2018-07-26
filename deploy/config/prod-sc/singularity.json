@@ -1,0 +1,25 @@
+{
+    "requestId": "timeline",
+    "resources": {
+        "cpus": .01,
+        "memoryMb": 256,
+        "numPorts": 2
+    },
+    "healthcheck": {
+     "uri": "/index.html"
+   },
+    "containerInfo": {
+    "docker": {
+      "privileged": true,
+      "network": "BRIDGE",
+      "portMappings": [
+        {
+          "hostPortType": "FROM_OFFER",
+          "hostPort": 0,
+          "containerPortType": "LITERAL",
+          "containerPort": 8080
+        }
+      ]
+    }
+  }
+}
