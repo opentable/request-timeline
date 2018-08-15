@@ -1,7 +1,7 @@
 #!/bin/sh -ex
 
 deploy=$(date +%Y%m%d%H%M%S)
-version=1
+version=2
 
 echo "building ..."
 docker pull docker.otenv.com/ot-ubuntu:18-latest
