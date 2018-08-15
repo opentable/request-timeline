@@ -355,7 +355,7 @@
   function showMessage(msg) {
     if (msg) {
       var text = "";
-      Object.keys(msg).forEach(function(key) {
+      Object.keys(msg).sort().forEach(function(key) {
         var value = msg[key];
         if (typeof value === "object") {
           value = JSON.stringify(value);
