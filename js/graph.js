@@ -1,21 +1,10 @@
 (function() {
   // Object for quick lookup.
-  var LEGACY_SERVERS = {
-    "http://es-logging.otenv.com:9200/": true,
-    "http://es-logging-qa.otenv.com:9200/": true
-  };
   var SERVERS = [
     // loglov3.
     "http://loglov3-logging-qa.otenv.com:9200/",
     "http://loglov3-logging-prod.otenv.com:9200/"
   ];
-  // Put legacy entries into servers array.
-  (function() {
-    for (var legacy in LEGACY_SERVERS)
-      if (LEGACY_SERVERS.hasOwnProperty(legacy)) {
-        SERVERS.push(legacy);
-      }
-  })();
 
   var MS_PER_DAY = 24*60*60*1000;
   var SEARCH_WINDOW = 2 * MS_PER_DAY;
@@ -31,9 +20,6 @@
     columns: [
       {
         data: '@timestamp'
-      },
-      {
-        data: '__loglov3__'
       },
       {
         data: 'component-id',
@@ -251,10 +237,6 @@
     delete msg.servicetype;
     delete msg['service-type'];
     ret['component-id'] = componentId;
-
-    var legacy = !!LEGACY_SERVERS[server];
-    // Unicode/emoji: warning triangle or green check.
-    ret.__loglov3__ = legacy ? '⚠️' : '✅';
 
     return ret;
   }
