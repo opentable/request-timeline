@@ -3,7 +3,7 @@
   var SERVERS = [
     // loglov3.
     "http://loglov3-logging-qa.otenv.com:9200/",
-    "http://loglov3-logging-prod.otenv.com:9200/"
+    "http://loglov3-next-logging-prod.otenv.com:9200/"
   ];
 
   var MS_PER_DAY = 24*60*60*1000;
